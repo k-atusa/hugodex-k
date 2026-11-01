@@ -1,0 +1,41 @@
+# English UI Translations
+nav_posts: "Posts"
+nav_categories: "Categories"
+nav_tags: "Tags"
+nav_editor: "Web Editor"
+nav_search: "Search"
+
+table_of_contents: "Table of Contents"
+published_on: "Published"
+updated_on: "Updated"
+reading_time: "Reading time"
+minute: "min"
+words: "words"
+
+tag_list: "Tags"
+category_list: "Categories"
+series_list: "Series"
+
+share: "Share"
+copy_code: "Copy"
+copied: "Copied!"
+expand_code: "Expand code"
+collapse_code: "Collapse code"
+
+prev_post: "Previous Post"
+next_post: "Next Post"
+back_to_list: "Back to list"
+
+comments: "Comments"
+comments_disabled: "Comments are disabled."
+
+search_placeholder: "Search posts..."
+search_no_results: "No results found."
+
+language_switcher: "Language"
+translation_not_available: "This post is currently not available in English."
+view_english_version: "English version"
+
+draft_badge: "Draft"
+footer_powered_by: "Powered by Hugo & GitHub Pages"
+

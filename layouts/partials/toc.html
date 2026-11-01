@@ -1,0 +1,19 @@
+{{ if and (gt .WordCount 100) (ne .Params.toc false) }}
+<aside class="post-toc" id="postToc">
+  <div class="toc-header">
+    <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="8" y1="6" x2="21" y2="6"></line>
+      <line x1="8" y1="12" x2="21" y2="12"></line>
+      <line x1="8" y1="18" x2="21" y2="18"></line>
+      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+    </svg>
+    <span class="toc-title">{{ i18n "table_of_contents" }}</span>
+  </div>
+  <div class="toc-body">
+    {{ .TableOfContents }}
+  </div>
+</aside>
+{{ end }}
+

@@ -1,0 +1,25 @@
+{{- $src := .Get "src" -}}
+{{- $width := .Get "width" | default "100%" -}}
+{{- $height := .Get "height" | default "auto" -}}
+{{- $caption := .Get "caption" -}}
+{{- $align := .Get "align" | default "center" -}}
+
+<figure class="svg-figure" style="text-align: {{ $align }};">
+  <div class="svg-viewport" style="max-width: {{ $width }}; margin: 0 auto;">
+    {{ if $src }}
+      {{/* Page Bundle 내의 svg 리소스 또는 static/ 경로 검색 */}}
+      {{ $svgRes := $.Page.Resources.GetMatch $src }}
+      {{ if $svgRes }}
+        {{ $svgRes.Content | safeHTML }}
+      {{ else }}
+        <img src="{{ $src | relURL }}" alt="{{ $caption | default "SVG Diagram" }}" style="width: {{ $width }}; height: {{ $height }};">
+      {{ end }}
+    {{ else }}
+      {{ .Inner | safeHTML }}
+    {{ end }}
+  </div>
+  {{ with $caption }}
+    <figcaption class="svg-caption">{{ . }}</figcaption>
+  {{ end }}
+</figure>
+

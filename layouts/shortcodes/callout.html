@@ -1,0 +1,33 @@
+{{- $type := .Get "type" | default "note" -}}
+{{- $title := .Get "title" -}}
+{{- $icon := "ℹ" -}}
+
+{{- if eq $type "theorem" -}}
+  {{- $icon = "📐" -}}
+  {{- if not $title }}{{ $title = "정리 (Theorem)" }}{{ end -}}
+{{- else if eq $type "definition" -}}
+  {{- $icon = "📖" -}}
+  {{- if not $title }}{{ $title = "정의 (Definition)" }}{{ end -}}
+{{- else if eq $type "proof" -}}
+  {{- $icon = "∎" -}}
+  {{- if not $title }}{{ $title = "증명 (Proof)" }}{{ end -}}
+{{- else if eq $type "warning" -}}
+  {{- $icon = "⚠" -}}
+  {{- if not $title }}{{ $title = "주의 (Warning)" }}{{ end -}}
+{{- else if eq $type "tip" -}}
+  {{- $icon = "💡" -}}
+  {{- if not $title }}{{ $title = "팁 (Tip)" }}{{ end -}}
+{{- else -}}
+  {{- if not $title }}{{ $title = "참고 (Note)" }}{{ end -}}
+{{- end -}}
+
+<div class="callout callout-{{ $type }}">
+  <div class="callout-header">
+    <span class="callout-icon">{{ $icon }}</span>
+    <span class="callout-title">{{ $title }}</span>
+  </div>
+  <div class="callout-content">
+    {{ .Inner | markdownify }}
+  </div>
+</div>
+

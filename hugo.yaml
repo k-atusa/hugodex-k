@@ -1,0 +1,110 @@
+baseURL: "https://example.com/"
+title: "hugodex-k"
+defaultContentLanguage: "ko"
+defaultContentLanguageInSubdir: false
+enableRobotsTXT: true
+summaryLength: 50
+
+# Taxonomies (분류 체계)
+taxonomies:
+  category: categories
+  tag: tags
+  series: series
+
+# 다국어 설정 (i18n)
+languages:
+  ko:
+    languageName: "한국어"
+    languageCode: "ko-kr"
+    weight: 1
+    title: "hugodex-k"
+    params:
+      description: "프로그래밍, 고급 수학, 구조도 다이어그램 정적 지식 블로그"
+      keywords: ["프로그래밍", "수학", "LaTeX", "Mermaid", "아키텍처", "컴퓨터 과학"]
+      author: "hugodex Author"
+  en:
+    languageName: "English"
+    languageCode: "en-us"
+    weight: 2
+    title: "hugodex-k (EN)"
+    params:
+      description: "Static knowledge blog specialized in programming, advanced mathematics, and system diagrams"
+      keywords: ["Programming", "Mathematics", "LaTeX", "Mermaid", "Architecture", "Computer Science"]
+      author: "hugodex Author"
+
+# 마크다운 렌더러 및 문법 하이라이팅 설정
+markup:
+  goldmark:
+    renderer:
+      unsafe: true # raw HTML, SVG, iframe, 대화형 샌드박스를 위해 필수
+    extensions:
+      passthrough: # LaTeX 수식 파싱 보호 (언더스코어 및 곱셈기호 충돌 방지)
+        enable: true
+        delimiters:
+          block:
+            - ['\\[', '\\]']
+            - ['$$', '$$']
+          inline:
+            - ['\\(', '\\)']
+            - ['$', '$']
+      table: true
+      strikethrough: true
+      linkify: true
+      taskLists: true
+      typographer: false # 수식의 따옴표나 대시가 스마트 변환되어 LaTeX 문법이 깨지는 현상 방지
+  highlight:
+    codeFences: true
+    guessSyntax: true
+    lineNos: true
+    lineNumbersInTable: true
+    noClasses: false # 외부 의존성 없이 CSS 클래스로 다크/라이트 하이라이팅 전환
+    style: "monokai"
+  tableOfContents:
+    startLevel: 2
+    endLevel: 4
+    ordered: false
+
+# 사이트 전역 파라미터
+params:
+  siteName: "hugodex-k"
+  copyright: "© 2026 hugodex-k. All rights reserved."
+  
+  # 수식 및 다이어그램 기능 활성화 기본값
+  math: true
+  mermaid: true
+  
+  # 댓글 시스템 (Giscus: GitHub Discussions 기반)
+  giscus:
+    enabled: true
+    repo: ""             # GitHub 레포 (예: username/hugodex-k)
+    repoId: ""           # Giscus 설정에서 발급받은 ID
+    category: "Announcements"
+    categoryId: ""       # Discussions 카테고리 ID
+    mapping: "pathname"
+    strict: "0"
+    reactionsEnabled: "1"
+    emitMetadata: "0"
+    inputPosition: "bottom"
+    theme: "preferred_color_scheme"
+    lang: "ko"
+    loading: "lazy"
+
+  # 네비게이션 메뉴
+  menu:
+    main:
+      - identifier: posts
+        name: "글 목록"
+        url: "/posts/"
+        weight: 10
+      - identifier: categories
+        name: "카테고리"
+        url: "/categories/"
+        weight: 20
+      - identifier: tags
+        name: "태그"
+        url: "/tags/"
+        weight: 30
+      - identifier: editor
+        name: "웹 에디터"
+        url: "/editor/"
+        weight: 40

@@ -1,0 +1,39 @@
+{{ if and site.Params.giscus.enabled (not .Params.disableComments) }}
+<section class="comments-section" id="comments">
+  <div class="comments-header">
+    <h3 class="comments-title">
+      <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      {{ i18n "comments" }}
+    </h3>
+    <p class="comments-notice">GitHub Discussions를 통해 댓글이 안전하게 기록되고 관리됩니다.</p>
+  </div>
+
+  {{ if site.Params.giscus.repo }}
+    <div class="giscus-container">
+      <script src="https://giscus.app/client.js"
+        data-repo="{{ site.Params.giscus.repo }}"
+        data-repo-id="{{ site.Params.giscus.repoId }}"
+        data-category="{{ site.Params.giscus.category }}"
+        data-category-id="{{ site.Params.giscus.categoryId }}"
+        data-mapping="{{ default "pathname" site.Params.giscus.mapping }}"
+        data-strict="{{ default "0" site.Params.giscus.strict }}"
+        data-reactions-enabled="{{ default "1" site.Params.giscus.reactionsEnabled }}"
+        data-emit-metadata="{{ default "0" site.Params.giscus.emitMetadata }}"
+        data-input-position="{{ default "bottom" site.Params.giscus.inputPosition }}"
+        data-theme="{{ default "preferred_color_scheme" site.Params.giscus.theme }}"
+        data-lang="{{ default "ko" .Language.Lang }}"
+        data-loading="lazy"
+        crossorigin="anonymous"
+        async>
+      </script>
+    </div>
+  {{ else }}
+    <div class="giscus-placeholder">
+      <p>💡 <em>Giscus 댓글 설정이 아직 완료되지 않았습니다. <code>hugo.yaml</code>에서 <code>params.giscus.repo</code> 및 <code>repoId</code>를 설정하면 GitHub Discussions 댓글이 활성화됩니다.</em></p>
+    </div>
+  {{ end }}
+</section>
+{{ end }}
+

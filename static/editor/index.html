@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hugodex-k Web Editor & Studio</title>
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="editor.css">
+  <!-- 로컬 KaTeX & Mermaid -->
+  <script defer src="../vendor/katex/katex.min.js"></script>
+  <script defer src="../vendor/katex/contrib/auto-render.min.js"></script>
+  <script defer src="../vendor/mermaid/mermaid.min.js"></script>
+</head>
+<body class="editor-app">
+  <!-- Top App Navigation Bar -->
+  <header class="app-bar">
+    <div class="app-brand">
+      <a href="../" class="back-home-link" title="블로그 메인으로 돌아가기">&larr;</a>
+      <span class="brand-logo">H</span>
+      <span class="brand-title">hugodex <strong>Studio</strong></span>
+    </div>
+
+    <!-- Active File & Meta Quick Info -->
+    <div class="active-file-info" id="activeFileInfo">
+      <span class="file-status-indicator" id="fileStatusIndicator"></span>
+      <span class="file-name-label" id="currentFileName">새 게시글 (Untitled)</span>
+      <span class="badge draft-badge-ui" id="draftBadge" style="display: none;">Draft</span>
+    </div>
+
+    <div class="app-actions">
+      <button class="btn btn-secondary" id="openSettingsBtn" title="GitHub 연동 설정">
+        <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        GitHub 연동
+      </button>
+
+      <button class="btn btn-secondary" id="newPostBtn" title="새 글 작성">
+        <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        새 글
+      </button>
+
+      <button class="btn btn-primary" id="publishBtn" title="GitHub에 커밋 및 배포">
+        <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        발행 (Commit)
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace Layout -->
+  <div class="workspace-layout">
+    <!-- Left Sidebar: File Tree & History -->
+    <aside class="sidebar-pane" id="sidebarPane">
+      <div class="sidebar-header">
+        <span class="sidebar-title">저장소 글 목록</span>
+        <button class="icon-btn-small" id="refreshRepoBtn" title="목록 새로고침">↻</button>
+      </div>
+      <div class="file-tree-container" id="fileTreeContainer">
+        <div class="loading-state">GitHub 연동 설정을 먼저 확인해 주세요.</div>
+      </div>
+    </aside>
+
+    <!-- Center & Right: Editor & Live Preview -->
+    <main class="editor-main-pane">
+      <!-- Front Matter Metadata Form Bar -->
+      <section class="metadata-form-bar">
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label>제목</label>
+            <input type="text" id="postTitleInput" placeholder="게시글 제목을 입력하세요" class="input-field">
+          </div>
+          <div class="form-group flex-1">
+            <label>폴더/경로</label>
+            <input type="text" id="postFolderInput" placeholder="posts/my-folder" class="input-field" value="posts">
+          </div>
+          <div class="form-group">
+            <label>언어</label>
+            <select id="postLangSelect" class="input-field select-field">
+              <option value="ko" selected>한국어 (.ko.md)</option>
+              <option value="en">English (.en.md)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>초안(Draft)</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="postDraftCheckbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label>태그 (쉼표로 구분)</label>
+            <input type="text" id="postTagsInput" placeholder="수학, 선형대수, 알고리즘" class="input-field">
+          </div>
+          <div class="form-group flex-1">
+            <label>카테고리</label>
+            <input type="text" id="postCategoriesInput" placeholder="Mathematics" class="input-field">
+          </div>
+        </div>
+      </section>
+
+      <!-- WYSIWYG Editing Toolbar -->
+      <div class="editor-toolbar">
+        <div class="toolbar-group">
+          <button class="tb-btn" data-action="heading1" title="제목 1 (H1)">H1</button>
+          <button class="tb-btn" data-action="heading2" title="제목 2 (H2)">H2</button>
+          <button class="tb-btn" data-action="heading3" title="제목 3 (H3)">H3</button>
+          <span class="tb-divider"></span>
+          <button class="tb-btn" data-action="bold" title="굵게 (Bold)"><strong>B</strong></button>
+          <button class="tb-btn" data-action="italic" title="기울임 (Italic)"><em>I</em></button>
+          <button class="tb-btn" data-action="strike" title="취소선">~S~</button>
+          <span class="tb-divider"></span>
+          <button class="tb-btn" data-action="ul" title="글머리 기호 목록">• 목록</button>
+          <button class="tb-btn" data-action="ol" title="번호 매기기 목록">1. 목록</button>
+          <button class="tb-btn" data-action="quote" title="인용문">” 인용</button>
+          <button class="tb-btn" data-action="table" title="표(Table) 삽입">⊞ 표</button>
+        </div>
+
+        <!-- Special Feature Visual Buttons -->
+        <div class="toolbar-group special-group">
+          <button class="tb-btn feature-btn math-btn" id="openMathPaletteBtn" title="LaTeX 수식 비주얼 빌더">
+            <span class="btn-symbol">∑</span> 수학 수식 (LaTeX)
+          </button>
+          <button class="tb-btn feature-btn diagram-btn" id="openMermaidWizardBtn" title="Mermaid 다이어그램 비주얼 위자드">
+            <span class="btn-symbol">❖</span> 구조도 (Mermaid)
+          </button>
+          <button class="tb-btn feature-btn svg-btn" id="openSvgWizardBtn" title="SVG 벡터 그래픽 삽입">
+            <span class="btn-symbol">⬡</span> SVG
+          </button>
+          <button class="tb-btn feature-btn callout-btn" id="openCalloutWizardBtn" title="정리/증명/알림 박스">
+            <span class="btn-symbol">💡</span> 콜아웃
+          </button>
+          <button class="tb-btn feature-btn interactive-btn" id="openInteractiveWizardBtn" title="대화형 JS/HTML 컴포넌트">
+            <span class="btn-symbol">▶</span> 인터랙티브
+          </button>
+          <button class="tb-btn feature-btn upload-btn" id="uploadImageBtn" title="이미지 업로드">
+            <span class="btn-symbol">🖼</span> 이미지
+          </button>
+          <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
+        </div>
+
+        <div class="toolbar-group right-group">
+          <button class="tb-btn" id="toggleSplitViewBtn" title="화면 분할 모드 전환">◫ 분할 뷰</button>
+        </div>
+      </div>
+
+      <!-- Split Container: Editor Textarea & Live Preview -->
+      <div class="split-view-container" id="splitViewContainer">
+        <!-- Markdown Source Area -->
+        <div class="split-pane editor-pane">
+          <textarea id="markdownEditor" class="editor-textarea" placeholder="여기에 마크다운 본문을 작성하세요..."></textarea>
+        </div>
+
+        <!-- Real-time Rendered Live Preview Area -->
+        <div class="split-pane preview-pane">
+          <div class="preview-header">
+            <span>실시간 렌더링 미리보기</span>
+            <span class="render-badge">Live Preview</span>
+          </div>
+          <div class="preview-content markdown-content" id="livePreview"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal 1: LaTeX Math Palette Wizard -->
+  <div class="modal-overlay" id="mathPaletteModal">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <h3>∑ LaTeX 수학 공식 비주얼 빌더</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">원하는 수학 기호나 템플릿을 클릭하면 수식이 자동으로 구성되고 실시간으로 렌더링됩니다.</p>
+        
+        <!-- Symbol Palette Tabs -->
+        <div class="palette-tabs">
+          <button class="palette-tab-btn active" data-tab="templates">구조 템플릿</button>
+          <button class="palette-tab-btn" data-tab="symbols">연산자/기호</button>
+          <button class="palette-tab-btn" data-tab="greek">그리스 문자</button>
+          <button class="palette-tab-btn" data-tab="matrices">행렬/연립식</button>
+        </div>
+
+        <div class="palette-content" id="paletteContent">
+          <!-- Templates Tab -->
+          <div class="palette-grid tab-section active" id="tab-templates">
+            <button class="pal-btn" data-latex="\frac{a}{b}">분수 $\frac{a}{b}$</button>
+            <button class="pal-btn" data-latex="x^{n}">거듭제곱 $x^{n}$</button>
+            <button class="pal-btn" data-latex="x_{i}">아래첨자 $x_{i}$</button>
+            <button class="pal-btn" data-latex="\sqrt{x}">루트 $\sqrt{x}$</button>
+            <button class="pal-btn" data-latex="\int_{a}^{b} f(x) \, dx">정적분 $\int_{a}^{b} f(x) dx$</button>
+            <button class="pal-btn" data-latex="\sum_{i=1}^{n} x_i">시그마 $\sum_{i=1}^{n} x_i$</button>
+            <button class="pal-btn" data-latex="\lim_{x \to \infty} f(x)">극한 $\lim_{x \to \infty}$</button>
+            <button class="pal-btn" data-latex="\frac{\partial f}{\partial x}">편미분 $\frac{\partial f}{\partial x}$</button>
+          </div>
+
+          <!-- Symbols Tab -->
+          <div class="palette-grid tab-section" id="tab-symbols">
+            <button class="pal-btn" data-latex="\pm">$\pm$</button>
+            <button class="pal-btn" data-latex="\times">$\times$</button>
+            <button class="pal-btn" data-latex="\div">$\div$</button>
+            <button class="pal-btn" data-latex="\cdot">$\cdot$</button>
+            <button class="pal-btn" data-latex="\neq">$\neq$</button>
+            <button class="pal-btn" data-latex="\approx">$\approx$</button>
+            <button class="pal-btn" data-latex="\le">$\le$</button>
+            <button class="pal-btn" data-latex="\ge">$\ge$</button>
+            <button class="pal-btn" data-latex="\infty">$\infty$</button>
+            <button class="pal-btn" data-latex="\nabla">$\nabla$</button>
+            <button class="pal-btn" data-latex="\in">$\in$</button>
+            <button class="pal-btn" data-latex="\subset">$\subset$</button>
+            <button class="pal-btn" data-latex="\forall">$\forall$</button>
+            <button class="pal-btn" data-latex="\exists">$\exists$</button>
+          </div>
+
+          <!-- Greek Tab -->
+          <div class="palette-grid tab-section" id="tab-greek">
+            <button class="pal-btn" data-latex="\alpha">$\alpha$</button>
+            <button class="pal-btn" data-latex="\beta">$\beta$</button>
+            <button class="pal-btn" data-latex="\gamma">$\gamma$</button>
+            <button class="pal-btn" data-latex="\delta">$\delta$</button>
+            <button class="pal-btn" data-latex="\epsilon">$\epsilon$</button>
+            <button class="pal-btn" data-latex="\theta">$\theta$</button>
+            <button class="pal-btn" data-latex="\lambda">$\lambda$</button>
+            <button class="pal-btn" data-latex="\mu">$\mu$</button>
+            <button class="pal-btn" data-latex="\pi">$\pi$</button>
+            <button class="pal-btn" data-latex="\sigma">$\sigma$</button>
+            <button class="pal-btn" data-latex="\phi">$\phi$</button>
+            <button class="pal-btn" data-latex="\omega">$\omega$</button>
+            <button class="pal-btn" data-latex="\Delta">$\Delta$</button>
+            <button class="pal-btn" data-latex="\Sigma">$\Sigma$</button>
+          </div>
+
+          <!-- Matrices Tab -->
+          <div class="palette-grid tab-section" id="tab-matrices">
+            <button class="pal-btn" data-latex="\begin{pmatrix} a & b \\ c & d \end{pmatrix}">2x2 행렬</button>
+            <button class="pal-btn" data-latex="\begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix}">3x3 대괄호 행렬</button>
+            <button class="pal-btn" data-latex="\begin{cases} x + y = 1 \\ 2x - y = 0 \end{cases}">연립방정식</button>
+          </div>
+        </div>
+
+        <!-- Formula Input & Realtime Preview -->
+        <div class="formula-edit-area">
+          <label>수식 LaTeX 코드:</label>
+          <input type="text" id="mathFormulaInput" class="input-field code-input" value="\int_{0}^{\infty} e^{-x^2} dx = \frac{\sqrt{\pi}}{2}">
+        </div>
+
+        <div class="formula-preview-area">
+          <label>실시간 KaTeX 렌더링:</label>
+          <div class="math-preview-box" id="mathPreviewBox"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-cancel-btn">취소</button>
+        <button class="btn btn-secondary" id="insertInlineMathBtn">인라인 수식으로 삽입 ($)</button>
+        <button class="btn btn-primary" id="insertBlockMathBtn">블록 수식으로 삽입 ($$)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Mermaid Diagram Wizard -->
+  <div class="modal-overlay" id="mermaidWizardModal">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <h3>❖ Mermaid 다이어그램 비주얼 위자드</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="diagram-type-selector">
+          <label>다이어그램 유형 선택:</label>
+          <div class="type-cards">
+            <div class="type-card active" data-type="flowchart">
+              <strong>순서도 (Flowchart)</strong>
+              <span>흐름도, 시스템 처리 로직</span>
+            </div>
+            <div class="type-card" data-type="sequence">
+              <strong>시퀀스 (Sequence)</strong>
+              <span>메시지 호출, API 통신 흐름</span>
+            </div>
+            <div class="type-card" data-type="class">
+              <strong>클래스 (Class)</strong>
+              <span>객체 지향 클래스 구조</span>
+            </div>
+            <div class="type-card" data-type="state">
+              <strong>상태도 (State)</strong>
+              <span>라이프사이클, 상태 머신</span>
+            </div>
+            <div class="type-card" data-type="git">
+              <strong>Git 그래프 (GitGraph)</strong>
+              <span>브랜치, 커밋, 병합 흐름</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram-editor-row">
+          <div class="diagram-code-col">
+            <label>다이어그램 소스 코드:</label>
+            <textarea id="mermaidCodeInput" class="editor-textarea mini-textarea"></textarea>
+          </div>
+          <div class="diagram-preview-col">
+            <label>실시간 렌더링 미리보기:</label>
+            <div class="diagram-preview-box" id="mermaidPreviewBox"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-cancel-btn">취소</button>
+        <button class="btn btn-primary" id="insertDiagramBtn">본문에 다이어그램 삽입</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Callout Wizard -->
+  <div class="modal-overlay" id="calloutWizardModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3>💡 콜아웃 (학술 정리/증명/알림) 삽입</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>콜아웃 종류</label>
+          <select id="calloutTypeSelect" class="input-field select-field">
+            <option value="theorem">📐 정리 (Theorem)</option>
+            <option value="definition">📖 정의 (Definition)</option>
+            <option value="proof">∎ 증명 (Proof)</option>
+            <option value="note" selected>ℹ 참고 (Note)</option>
+            <option value="tip">💡 팁 (Tip)</option>
+            <option value="warning">⚠ 주의 (Warning)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>제목 (선택사항)</label>
+          <input type="text" id="calloutTitleInput" placeholder="예: 코시-슈바르츠 부등식" class="input-field">
+        </div>
+        <div class="form-group">
+          <label>내용</label>
+          <textarea id="calloutContentInput" class="editor-textarea mini-textarea" placeholder="콜아웃 안에 들어갈 내용을 입력하세요..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-cancel-btn">취소</button>
+        <button class="btn btn-primary" id="insertCalloutBtn">삽입</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: GitHub Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3>⚙️ GitHub 연동 설정</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>GitHub Personal Access Token (Fine-grained PAT)</label>
+          <input type="password" id="ghTokenInput" class="input-field" placeholder="github_pat_...">
+          <small class="helper-text">토큰 권한: 대상 저장소에 대해 <code>Contents: Read and write</code>, <code>Metadata: Read-only</code> 권한이 필요합니다. 토큰은 오직 사용자 브라우저 로컬 스토리지에만 저장됩니다.</small>
+        </div>
+        <div class="form-group">
+          <label>저장소 소유자 (GitHub Username / Org)</label>
+          <input type="text" id="ghOwnerInput" class="input-field" placeholder="예: octocat">
+        </div>
+        <div class="form-group">
+          <label>저장소 이름 (Repository Name)</label>
+          <input type="text" id="ghRepoInput" class="input-field" placeholder="hugodex-k">
+        </div>
+        <div class="form-group">
+          <label>대상 브랜치 (Branch)</label>
+          <input type="text" id="ghBranchInput" class="input-field" value="main">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-cancel-btn">닫기</button>
+        <button class="btn btn-primary" id="saveSettingsBtn">설정 저장 및 연결 테스트</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast-notification" id="toastNotification"></div>
+
+  <!-- Editor Script -->
+  <script src="editor.js"></script>
+</body>
+</html>
+

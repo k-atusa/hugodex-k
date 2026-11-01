@@ -1,0 +1,88 @@
+{{ define "main" }}
+<div class="list-container">
+  <header class="list-header">
+    <h1 class="list-title">
+      {{ if eq .Data.Singular "category" }}
+        <span class="list-prefix">카테고리:</span> {{ .Title }}
+      {{ else if eq .Data.Singular "tag" }}
+        <span class="list-prefix">태그:</span> #{{ .Title }}
+      {{ else }}
+        {{ .Title }}
+      {{ end }}
+    </h1>
+    {{ with .Description }}
+      <p class="list-description">{{ . }}</p>
+    {{ end }}
+  </header>
+
+  {{/* 카테고리/태그 클라우드 또는 빠른 링크 */}}
+  {{ if eq .Section "posts" }}
+    <div class="taxonomy-bar">
+      {{ with site.Taxonomies.categories }}
+        <div class="taxonomy-group">
+          <span class="taxonomy-title">카테고리:</span>
+          {{ range $name, $taxonomy := . }}
+            <a href="{{ printf "categories/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-pill">
+              {{ $name }} <span class="count">({{ $taxonomy.Count }})</span>
+            </a>
+          {{ end }}
+        </div>
+      {{ end }}
+    </div>
+  {{ end }}
+
+  {{/* 포스트 카드 목록 */}}
+  <div class="posts-list">
+    {{ $pages := .Pages }}
+    {{ if .IsHome }}
+      {{ $pages = where site.RegularPages "Type" "in" site.Params.mainSections }}
+    {{ end }}
+
+    {{ range $pages }}
+      <article class="post-card">
+        <div class="post-card-meta">
+          <time datetime="{{ .Date.Format "2006-01-02" }}" class="post-card-date">
+            {{ .Date.Format "2006-01-02" }}
+          </time>
+          {{ with .Params.categories }}
+            <span class="post-card-category">{{ index . 0 }}</span>
+          {{ end }}
+          {{ if .Draft }}
+            <span class="badge draft-badge-small">초안</span>
+          {{ end }}
+        </div>
+
+        <h2 class="post-card-title">
+          <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+        </h2>
+
+        <p class="post-card-summary">
+          {{ with .Description }}
+            {{ . }}
+          {{ else }}
+            {{ .Summary | plainify | truncate 160 }}
+          {{ end }}
+        </p>
+
+        <div class="post-card-footer">
+          <div class="post-card-tags">
+            {{ range first 3 .Params.tags }}
+              <span class="tag-badge">#{{ . }}</span>
+            {{ end }}
+          </div>
+          <span class="reading-time-text">{{ .ReadingTime }} {{ i18n "minute" }}</span>
+        </div>
+      </article>
+    {{ else }}
+      <div class="empty-state">
+        <p>작성된 글이 아직 없습니다.</p>
+        <a href="{{ "editor/" | relURL }}" class="button primary-btn">웹 에디터에서 첫 글 작성하기</a>
+      </div>
+    {{ end }}
+  </div>
+
+  {{/* 페이지네이션 */}}
+  {{ template "_internal/pagination.html" . }}
+</div>
+{{ end }}
+

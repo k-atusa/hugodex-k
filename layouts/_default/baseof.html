@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="{{ .Language.LanguageCode | default "ko" }}" data-theme="light">
+{{ partial "head.html" . }}
+<body class="site-body">
+  <div class="site-wrapper" id="top">
+    {{ partial "header.html" . }}
+
+    <main class="site-main container">
+      {{ block "main" . }}{{ end }}
+    </main>
+
+    {{ partial "footer.html" . }}
+  </div>
+</body>
+</html>
+
