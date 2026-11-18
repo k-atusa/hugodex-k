@@ -26,21 +26,22 @@
 
   function reRenderMermaid(theme) {
     if (typeof mermaid === 'undefined') return;
-    var containers = document.querySelectorAll('.mermaid-wrap');
-    if (!containers.length) return;
+    var nodes = document.querySelectorAll('.mermaid');
+    if (!nodes.length) return;
     mermaid.initialize({
       startOnLoad: false,
-      theme: theme === 'dark' ? 'dark' : 'neutral'
+      theme: theme === 'dark' ? 'dark' : 'neutral',
+      securityLevel: 'loose'
     });
-    containers.forEach(function (wrap) {
-      var src = wrap.getAttribute('data-mermaid-src');
+    nodes.forEach(function (el) {
+      var src = el.getAttribute('data-mermaid-src') || el.closest('.mermaid-wrap')?.getAttribute('data-mermaid-src');
       if (!src) return;
-      var el = wrap.querySelector('.mermaid');
-      if (!el) return;
       el.removeAttribute('data-processed');
       el.innerHTML = src;
     });
-    mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+    mermaid.run({ nodes: nodes }).catch(function (err) {
+      console.warn('Mermaid re-render notice:', err);
+    });
   }
 
   function syncGiscusTheme(theme) {

@@ -378,8 +378,8 @@ Hugo 단축코드 `{{</* svg-inline */>}}`를 활용한 기하학적 벡터 도�
 
 {{< interactive id="test-sandbox" height="260px" title="실시간 대화형 파티클 캔버스" >}}
 <style>
-  body { margin: 0; background: #0b0f19; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-  canvas { background: #0b0f19; }
+  #test-sandbox .interactive-body { background: #0b0f19; display: flex; align-items: center; justify-content: center; padding: 1rem; border-radius: 4px; }
+  #pCanvas { background: #0b0f19; max-width: 100%; height: auto; }
 </style>
 <canvas id="pCanvas" width="400" height="220"></canvas>
 <script>

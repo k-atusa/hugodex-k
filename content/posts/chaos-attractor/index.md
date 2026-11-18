@@ -34,8 +34,8 @@ $$
 
 {{< interactive id="lorenz-sim" height="340px" title="로렌츠 끌개(Lorenz Attractor) 실시간 궤적" >}}
 <style>
-  body { margin: 0; background: #090d16; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; }
-  canvas { background: #090d16; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+  #lorenz-sim .interactive-body { background: #090d16; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; border-radius: 4px; }
+  #chaosCanvas { background: #090d16; border-radius: 4px; max-width: 100%; height: auto; }
   .stat { color: #38bdf8; font-size: 11px; margin-top: 6px; font-family: monospace; }
 </style>
 <canvas id="chaosCanvas" width="480" height="280"></canvas>
