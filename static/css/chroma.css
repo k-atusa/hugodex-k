@@ -1,0 +1,140 @@
+/* Chroma syntax highlighting — light & dark */
+
+/* ── Light theme ─────────────────────────────────────── */
+.highlight { background: #f8f8f8; }
+.chroma { color: #272822; background: #f8f8f8; }
+
+/* Line numbers */
+.chroma .lnt, .chroma .ln { color: #7f7f7f; margin-right: 0.4em; padding: 0 0.4em; }
+.chroma .lnt { user-select: none; }
+.chroma .hl { background: #e6e6e6; display: block; }
+
+/* Keywords */
+.chroma .k,
+.chroma .kc,
+.chroma .kd,
+.chroma .kn,
+.chroma .kp,
+.chroma .kr { color: #0033b3; font-weight: 600; }
+.chroma .kt { color: #7a3e9d; }
+
+/* Names */
+.chroma .na { color: #174ad4; }
+.chroma .nb { color: #0033b3; }
+.chroma .nc { color: #7a3e9d; font-weight: 600; }
+.chroma .nf { color: #795e26; }
+.chroma .nn { color: #0033b3; }
+.chroma .nt { color: #22863a; }
+
+/* Strings */
+.chroma .s,
+.chroma .sa,
+.chroma .sb,
+.chroma .sc,
+.chroma .dl,
+.chroma .s2,
+.chroma .s1,
+.chroma .sh,
+.chroma .si,
+.chroma .sx,
+.chroma .sr,
+.chroma .se { color: #067d17; }
+.chroma .ss { color: #9e880d; }
+
+/* Numbers */
+.chroma .m,
+.chroma .mb,
+.chroma .mf,
+.chroma .mh,
+.chroma .mi,
+.chroma .mo,
+.chroma .il { color: #1750eb; }
+
+/* Comments */
+.chroma .c,
+.chroma .ch,
+.chroma .cm,
+.chroma .c1,
+.chroma .cs,
+.chroma .cp,
+.chroma .cpf { color: #8c8c8c; font-style: italic; }
+
+/* Operators */
+.chroma .o,
+.chroma .ow { color: #0033b3; }
+.chroma .p { color: #272822; }
+
+/* Others */
+.chroma .ge { font-style: italic; }
+.chroma .gs { font-weight: bold; }
+.chroma .gd { color: #b31d28; background: #ffeef0; }
+.chroma .gi { color: #22863a; background: #f0fff4; }
+.chroma .err { color: #d32f2f; }
+
+/* ── Dark theme ──────────────────────────────────────── */
+[data-theme="dark"] .highlight { background: #1e1e2e; }
+[data-theme="dark"] .chroma { color: #cdd6f4; background: #1e1e2e; }
+
+[data-theme="dark"] .chroma .lnt,
+[data-theme="dark"] .chroma .ln { color: #6c7086; }
+[data-theme="dark"] .chroma .hl { background: #313244; }
+
+/* Keywords */
+[data-theme="dark"] .chroma .k,
+[data-theme="dark"] .chroma .kc,
+[data-theme="dark"] .chroma .kd,
+[data-theme="dark"] .chroma .kn,
+[data-theme="dark"] .chroma .kp,
+[data-theme="dark"] .chroma .kr { color: #cba6f7; font-weight: 600; }
+[data-theme="dark"] .chroma .kt { color: #f9e2af; }
+
+/* Names */
+[data-theme="dark"] .chroma .na { color: #89b4fa; }
+[data-theme="dark"] .chroma .nb { color: #89dceb; }
+[data-theme="dark"] .chroma .nc { color: #f9e2af; font-weight: 600; }
+[data-theme="dark"] .chroma .nf { color: #89b4fa; }
+[data-theme="dark"] .chroma .nn { color: #cba6f7; }
+[data-theme="dark"] .chroma .nt { color: #f38ba8; }
+
+/* Strings */
+[data-theme="dark"] .chroma .s,
+[data-theme="dark"] .chroma .sa,
+[data-theme="dark"] .chroma .sb,
+[data-theme="dark"] .chroma .sc,
+[data-theme="dark"] .chroma .dl,
+[data-theme="dark"] .chroma .s2,
+[data-theme="dark"] .chroma .s1,
+[data-theme="dark"] .chroma .sh,
+[data-theme="dark"] .chroma .si,
+[data-theme="dark"] .chroma .sx,
+[data-theme="dark"] .chroma .sr,
+[data-theme="dark"] .chroma .se { color: #a6e3a1; }
+[data-theme="dark"] .chroma .ss { color: #f9e2af; }
+
+/* Numbers */
+[data-theme="dark"] .chroma .m,
+[data-theme="dark"] .chroma .mb,
+[data-theme="dark"] .chroma .mf,
+[data-theme="dark"] .chroma .mh,
+[data-theme="dark"] .chroma .mi,
+[data-theme="dark"] .chroma .mo,
+[data-theme="dark"] .chroma .il { color: #fab387; }
+
+/* Comments */
+[data-theme="dark"] .chroma .c,
+[data-theme="dark"] .chroma .ch,
+[data-theme="dark"] .chroma .cm,
+[data-theme="dark"] .chroma .c1,
+[data-theme="dark"] .chroma .cs,
+[data-theme="dark"] .chroma .cp,
+[data-theme="dark"] .chroma .cpf { color: #6c7086; font-style: italic; }
+
+/* Operators */
+[data-theme="dark"] .chroma .o,
+[data-theme="dark"] .chroma .ow { color: #89dceb; }
+[data-theme="dark"] .chroma .p { color: #cdd6f4; }
+
+/* Others */
+[data-theme="dark"] .chroma .gd { color: #f38ba8; background: rgba(243,139,168,0.1); }
+[data-theme="dark"] .chroma .gi { color: #a6e3a1; background: rgba(166,227,161,0.1); }
+[data-theme="dark"] .chroma .err { color: #f38ba8; }

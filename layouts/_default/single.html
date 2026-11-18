@@ -1,6 +1,6 @@
 {{ define "main" }}
-<article class="post-single">
-  {{/* 상단 브레드크럼 */}}
+<article class="post-single container">
+  {{/* Breadcrumbs */}}
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ site.Home.RelPermalink }}">Home</a>
     <span class="sep">/</span>
@@ -11,7 +11,7 @@
     <span class="current">{{ .Title }}</span>
   </nav>
 
-  {{/* 포스트 헤더 메타데이터 */}}
+  {{/* Post Header */}}
   <header class="post-header">
     <div class="post-meta-badges">
       {{ if .Draft }}
@@ -38,8 +38,8 @@
       </time>
 
       {{ if ne .Date .Lastmod }}
-        <span class="meta-item update-time" title="최종 수정일">
-          (수정: {{ .Lastmod.Format "2006-01-02" }})
+        <span class="meta-item update-time" title="{{ i18n "updated_on" }}">
+          ({{ i18n "updated_on" }}: {{ .Lastmod.Format "2006-01-02" }})
         </span>
       {{ end }}
 
@@ -51,19 +51,21 @@
         {{ .ReadingTime }} {{ i18n "minute" }} ({{ .WordCount }} {{ i18n "words" }})
       </span>
 
-      {{/* 웹 에디터에서 바로 열기 */}}
-      <a href="{{ "editor/" | relURL }}?file={{ .File.Path | default "" }}" class="meta-item edit-this-post" title="웹 에디터에서 이 글 수정">
-        <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-        </svg>
-        수정
-      </a>
+      {{/* Edit button */}}
+      {{ if .File }}
+        <a href="{{ "editor/" | relURL }}?file={{ .File.Path }}" class="meta-item edit-this-post" title="{{ i18n "edit_post" }}">
+          <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          {{ i18n "edit_post" }}
+        </a>
+      {{ end }}
     </div>
 
-    {{/* 다국어 번역 안내 배너 */}}
+    {{/* Translation links */}}
     {{ if .IsTranslated }}
-      <div class="translation-notice">
+      <div class="translation-links translation-notice">
         <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="2" y1="12" x2="22" y2="12"></line>
@@ -71,58 +73,63 @@
         </svg>
         <span>
           {{ range .Translations }}
-            <a href="{{ .Permalink }}" class="translation-link">{{ .Language.LanguageName }} 버전으로 읽기 &rarr;</a>
+            <a href="{{ .Permalink }}" class="translation-link">{{ .Language.LanguageName }} {{ i18n "translation_available" }} &rarr;</a>
           {{ end }}
         </span>
       </div>
     {{ end }}
   </header>
 
-  {{/* 본문 영역 + 목차 사이드바 그리드 */}}
-  <div class="post-layout-grid">
-    <div class="post-content-wrapper">
+  {{/* Post Body with TOC Sidebar */}}
+  <div class="post-body">
+    <div class="post-layout-grid post-content-layout">
       <div class="markdown-content">
         {{ .Content }}
       </div>
 
-      {{/* 태그 목록 */}}
-      {{ with .Params.tags }}
-        <div class="post-tags">
-          <span class="tags-label"># {{ i18n "tag_list" }}:</span>
-          {{ range . }}
-            <a href="{{ printf "tags/%s/" (. | urlize) | relLangURL }}" class="tag-item">#{{ . }}</a>
-          {{ end }}
-        </div>
+      {{ if .TableOfContents }}
+        <aside class="toc-sidebar post-sidebar">
+          <div class="post-toc">
+            <div class="toc-header">
+              <span class="toc-title">{{ i18n "table_of_contents" }}</span>
+            </div>
+            <div class="toc-body">
+              {{ .TableOfContents }}
+            </div>
+          </div>
+        </aside>
       {{ end }}
-
-      {{/* 글 하단 이전/다음 글 네비게이션 */}}
-      <nav class="post-pagination">
-        {{ with .PrevInSection }}
-          <a href="{{ .RelPermalink }}" class="pagination-link prev-link">
-            <span class="link-label">&larr; {{ i18n "prev_post" }}</span>
-            <span class="link-title">{{ .Title }}</span>
-          </a>
-        {{ else }}
-          <div class="pagination-spacer"></div>
-        {{ end }}
-
-        {{ with .NextInSection }}
-          <a href="{{ .RelPermalink }}" class="pagination-link next-link">
-            <span class="link-label">{{ i18n "next_post" }} &rarr;</span>
-            <span class="link-title">{{ .Title }}</span>
-          </a>
-        {{ end }}
-      </nav>
-
-      {{/* Giscus 댓글 */}}
-      {{ partial "comments.html" . }}
-    </div>
-
-    {{/* 오른쪽 목차(TOC) 사이드바 */}}
-    <div class="post-sidebar">
-      {{ partial "toc.html" . }}
     </div>
   </div>
+
+  {{/* Post Footer */}}
+  <footer class="post-footer">
+    {{ with .Params.tags }}
+      <div class="post-tags">
+        <span class="tags-label"># {{ i18n "tag_list" }}:</span>
+        {{ range . }}
+          <a href="{{ printf "tags/%s/" (. | urlize) | relLangURL }}" class="tag-item">#{{ . }}</a>
+        {{ end }}
+      </div>
+    {{ end }}
+
+    <nav class="post-pagination">
+      {{ with .PrevInSection }}
+        <a href="{{ .RelPermalink }}" class="pagination-link prev-link">
+          <span class="link-label">&larr; {{ i18n "prev_post" }}</span>
+          <span class="link-title">{{ .Title }}</span>
+        </a>
+      {{ else }}
+        <div class="pagination-spacer"></div>
+      {{ end }}
+
+      {{ with .NextInSection }}
+        <a href="{{ .RelPermalink }}" class="pagination-link next-link">
+          <span class="link-label">{{ i18n "next_post" }} &rarr;</span>
+          <span class="link-title">{{ .Title }}</span>
+        </a>
+      {{ end }}
+    </nav>
+  </footer>
 </article>
 {{ end }}
-

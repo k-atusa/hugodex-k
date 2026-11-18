@@ -1,9 +1,9 @@
 <footer class="site-footer">
   <div class="footer-inner container">
     <div class="footer-left">
-      <p class="copyright">{{ site.Params.copyright }}</p>
+      <p class="copyright">{{ with site.Params.copyright }}{{ . }}{{ else }}© {{ now.Format "2006" }} {{ site.Title }}. {{ i18n "copyright" }}{{ end }}</p>
       <p class="powered-by">
-        {{ i18n "footer_powered_by" }} &middot; 
+        {{ i18n "powered_by" }} &middot; 
         <a href="{{ "index.xml" | relLangURL }}" class="feed-link" target="_blank" rel="noopener">RSS Feed</a>
       </p>
     </div>
@@ -16,4 +16,3 @@
     </div>
   </div>
 </footer>
-

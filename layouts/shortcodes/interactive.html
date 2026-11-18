@@ -1,25 +1,23 @@
 {{- $id := .Get "id" | default (printf "interactive-%d" (now.UnixNano)) -}}
-{{- $height := .Get "height" | default "360px" -}}
-{{- $title := .Get "title" | default "인터랙티브 컴포넌트" -}}
+{{- $height := .Get "height" | default "400px" -}}
+{{- $title := .Get "title" | default "Interactive Component" -}}
 {{- $js := .Get "js" -}}
 {{- $css := .Get "css" -}}
 
-<div class="interactive-sandbox" id="{{ $id }}-container">
-  <div class="sandbox-toolbar">
-    <span class="sandbox-badge">
+<div class="interactive-wrap" id="{{ $id }}">
+  <div class="interactive-header sandbox-toolbar">
+    <span class="interactive-title sandbox-badge">
       <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
         <polygon points="5 3 19 12 5 21 5 3"></polygon>
       </svg>
       {{ $title }}
     </span>
-    <button class="sandbox-reset-btn" onclick="const f = document.getElementById('{{ $id }}-frame'); if(f) f.srcdoc = f.srcdoc;" title="컴포넌트 새로고침">
+    <button class="interactive-reload-btn sandbox-reset-btn" type="button" onclick="(function(){var f=document.getElementById('{{ $id }}-frame');if(f){var s=f.srcdoc;f.srcdoc='';f.srcdoc=s;}})()" title="다시 실행">
       다시 실행
     </button>
   </div>
-  
-  {{/* iframe srcdoc을 사용하여 포스트 스타일과 스크립트 격리 보장 */}}
-  <iframe id="{{ $id }}-frame" class="sandbox-frame" style="width: 100%; height: {{ $height }}; border: none; background: var(--bg-card);"
-    sandbox="allow-scripts"
+  <iframe id="{{ $id }}-frame" class="interactive-frame sandbox-frame" style="width: 100%; height: {{ $height }}; border: none; background: var(--bg-card, #ffffff);"
+    sandbox="allow-scripts allow-same-origin"
     srcdoc="<!DOCTYPE html>
 <html>
 <head>
@@ -34,7 +32,5 @@
   {{ .Inner | safeHTML }}
   {{ with $js }}<script>{{ . | safeJS }}</script>{{ end }}
 </body>
-</html>">
-  </iframe>
+</html>"></iframe>
 </div>
-

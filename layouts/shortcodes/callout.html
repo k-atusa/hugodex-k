@@ -1,27 +1,29 @@
-{{- $type := .Get "type" | default "note" -}}
-{{- $title := .Get "title" -}}
+{{- $type := .Get "type" | default (.Get 0 | default "note") -}}
+{{- $title := .Get "title" | default (.Get 1) -}}
 {{- $icon := "ℹ" -}}
 
 {{- if eq $type "theorem" -}}
   {{- $icon = "📐" -}}
-  {{- if not $title }}{{ $title = "정리 (Theorem)" }}{{ end -}}
+  {{- if not $title }}{{ $title = "Theorem" }}{{ end -}}
 {{- else if eq $type "definition" -}}
   {{- $icon = "📖" -}}
-  {{- if not $title }}{{ $title = "정의 (Definition)" }}{{ end -}}
+  {{- if not $title }}{{ $title = "Definition" }}{{ end -}}
 {{- else if eq $type "proof" -}}
   {{- $icon = "∎" -}}
-  {{- if not $title }}{{ $title = "증명 (Proof)" }}{{ end -}}
-{{- else if eq $type "warning" -}}
-  {{- $icon = "⚠" -}}
-  {{- if not $title }}{{ $title = "주의 (Warning)" }}{{ end -}}
+  {{- if not $title }}{{ $title = "Proof" }}{{ end -}}
 {{- else if eq $type "tip" -}}
   {{- $icon = "💡" -}}
-  {{- if not $title }}{{ $title = "팁 (Tip)" }}{{ end -}}
+  {{- if not $title }}{{ $title = "Tip" }}{{ end -}}
+{{- else if eq $type "warning" -}}
+  {{- $icon = "⚠" -}}
+  {{- if not $title }}{{ $title = "Warning" }}{{ end -}}
 {{- else -}}
-  {{- if not $title }}{{ $title = "참고 (Note)" }}{{ end -}}
+  {{- $type = "note" -}}
+  {{- $icon = "ℹ" -}}
+  {{- if not $title }}{{ $title = "Note" }}{{ end -}}
 {{- end -}}
 
-<div class="callout callout-{{ $type }}">
+<div class="callout callout--{{ $type }}">
   <div class="callout-header">
     <span class="callout-icon">{{ $icon }}</span>
     <span class="callout-title">{{ $title }}</span>
@@ -30,4 +32,3 @@
     {{ .Inner | markdownify }}
   </div>
 </div>
-

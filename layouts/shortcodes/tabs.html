@@ -1,10 +1,9 @@
 {{- $id := printf "tabs-%d" (now.UnixNano) -}}
 <div class="tabs-container" id="{{ $id }}">
   <div class="tabs-header">
-    {{/* 탭 헤더는 클라이언트 JS에서 자식 탭들을 읽어 동적 렌더링 */}}
+    {{/* Tab buttons rendered dynamically by blog.js from .tab-pane elements */}}
   </div>
   <div class="tabs-content">
     {{ .Inner }}
   </div>
 </div>
-

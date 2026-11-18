@@ -3,16 +3,16 @@ name: Deploy hugodex-k to GitHub Pages
 on:
   push:
     branches:
-      - main  # 기본 브랜치 변경 시 수정 가능
+      - main
   workflow_dispatch:
 
-# GitHub Pages 배포 권한 설정
+# GitHub Pages deployment permissions
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# 동시 배포 방지 및 최신 실행 우선
+# Prevent concurrent deployments and prioritize latest run
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -30,7 +30,7 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: 'latest'
+          hugo-version: '0.139.0'
           extended: true
 
       - name: Build Hugo Static Site
@@ -52,4 +52,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-

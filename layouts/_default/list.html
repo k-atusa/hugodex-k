@@ -1,11 +1,11 @@
 {{ define "main" }}
-<div class="list-container">
+<div class="list-container container">
   <header class="list-header">
     <h1 class="list-title">
       {{ if eq .Data.Singular "category" }}
-        <span class="list-prefix">카테고리:</span> {{ .Title }}
+        <span class="list-prefix">{{ i18n "category_list" }}:</span> {{ .Title }}
       {{ else if eq .Data.Singular "tag" }}
-        <span class="list-prefix">태그:</span> #{{ .Title }}
+        <span class="list-prefix">{{ i18n "tag_list" }}:</span> #{{ .Title }}
       {{ else }}
         {{ .Title }}
       {{ end }}
@@ -15,30 +15,40 @@
     {{ end }}
   </header>
 
-  {{/* 카테고리/태그 클라우드 또는 빠른 링크 */}}
-  {{ if eq .Section "posts" }}
-    <div class="taxonomy-bar">
-      {{ with site.Taxonomies.categories }}
-        <div class="taxonomy-group">
-          <span class="taxonomy-title">카테고리:</span>
-          {{ range $name, $taxonomy := . }}
-            <a href="{{ printf "categories/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-pill">
-              {{ $name }} <span class="count">({{ $taxonomy.Count }})</span>
-            </a>
-          {{ end }}
-        </div>
-      {{ end }}
-    </div>
-  {{ end }}
-
-  {{/* 포스트 카드 목록 */}}
-  <div class="posts-list">
-    {{ $pages := .Pages }}
-    {{ if .IsHome }}
-      {{ $pages = where site.RegularPages "Type" "in" site.Params.mainSections }}
+  {{/* Category/Tag Filter Bar */}}
+  <div class="taxonomy-bar">
+    {{ with site.Taxonomies.categories }}
+      <div class="taxonomy-group">
+        <span class="taxonomy-title">{{ i18n "category_list" }}:</span>
+        {{ range $name, $taxonomy := . }}
+          <a href="{{ printf "categories/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-pill">
+            {{ $name }} <span class="count">({{ $taxonomy.Count }})</span>
+          </a>
+        {{ end }}
+      </div>
     {{ end }}
 
-    {{ range $pages }}
+    {{ with site.Taxonomies.tags }}
+      <div class="taxonomy-group">
+        <span class="taxonomy-title">{{ i18n "tag_list" }}:</span>
+        {{ range $name, $taxonomy := . }}
+          <a href="{{ printf "tags/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-pill tag-pill">
+            #{{ $name }} <span class="count">({{ $taxonomy.Count }})</span>
+          </a>
+        {{ end }}
+      </div>
+    {{ end }}
+  </div>
+
+  {{/* Post cards */}}
+  <div class="post-list posts-list">
+    {{ $pages := .Pages }}
+    {{ if .IsHome }}
+      {{ $pages = where site.RegularPages "Type" "in" (slice "posts" "post") }}
+    {{ end }}
+    {{ $paginator := .Paginate $pages }}
+
+    {{ range $paginator.Pages }}
       <article class="post-card">
         <div class="post-card-meta">
           <time datetime="{{ .Date.Format "2006-01-02" }}" class="post-card-date">
@@ -48,7 +58,7 @@
             <span class="post-card-category">{{ index . 0 }}</span>
           {{ end }}
           {{ if .Draft }}
-            <span class="badge draft-badge-small">초안</span>
+            <span class="badge draft-badge-small">{{ i18n "draft_badge" }}</span>
           {{ end }}
         </div>
 
@@ -75,14 +85,13 @@
       </article>
     {{ else }}
       <div class="empty-state">
-        <p>작성된 글이 아직 없습니다.</p>
-        <a href="{{ "editor/" | relURL }}" class="button primary-btn">웹 에디터에서 첫 글 작성하기</a>
+        <p>{{ i18n "no_posts" }}</p>
+        <a href="{{ "editor/" | relURL }}" class="button primary-btn">{{ i18n "nav_editor" }}</a>
       </div>
     {{ end }}
   </div>
 
-  {{/* 페이지네이션 */}}
+  {{/* Pagination */}}
   {{ template "_internal/pagination.html" . }}
 </div>
 {{ end }}
-
