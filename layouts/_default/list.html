@@ -3,40 +3,40 @@
   <header class="list-header">
     <h1 class="list-title">
       {{ if eq .Data.Singular "category" }}
-        <span class="list-prefix">{{ i18n "category_list" }}:</span> {{ .Title }}
+      <span class="list-prefix">{{ i18n "category_list" }}:</span> {{ .Title }}
       {{ else if eq .Data.Singular "tag" }}
-        <span class="list-prefix">{{ i18n "tag_list" }}:</span> #{{ .Title }}
+      <span class="list-prefix">{{ i18n "tag_list" }}:</span> #{{ .Title }}
       {{ else }}
-        {{ .Title }}
+      {{ .Title }}
       {{ end }}
     </h1>
     {{ with .Description }}
-      <p class="list-description">{{ . }}</p>
+    <p class="list-description">{{ . }}</p>
     {{ end }}
   </header>
 
   {{/* Category/Tag Filter Bar */}}
   <div class="taxonomy-bar">
     {{ with site.Taxonomies.categories }}
-      <div class="taxonomy-group">
-        <span class="taxonomy-title">{{ i18n "category_list" }}:</span>
-        {{ range $name, $taxonomy := . }}
-          <a href="{{ printf "categories/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-pill">
-            {{ $name }} <span class="count">({{ $taxonomy.Count }})</span>
-          </a>
-        {{ end }}
-      </div>
+    <div class="taxonomy-group">
+      <span class="taxonomy-title">{{ i18n "category_list" }}:</span>
+      {{ range $name, $taxonomy := . }}
+      <a href="{{ printf " categories/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-pill">
+        {{ $name }} <span class="count">({{ $taxonomy.Count }})</span>
+      </a>
+      {{ end }}
+    </div>
     {{ end }}
 
     {{ with site.Taxonomies.tags }}
-      <div class="taxonomy-group">
-        <span class="taxonomy-title">{{ i18n "tag_list" }}:</span>
-        {{ range $name, $taxonomy := . }}
-          <a href="{{ printf "tags/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-pill tag-pill">
-            #{{ $name }} <span class="count">({{ $taxonomy.Count }})</span>
-          </a>
-        {{ end }}
-      </div>
+    <div class="taxonomy-group">
+      <span class="taxonomy-title">{{ i18n "tag_list" }}:</span>
+      {{ range $name, $taxonomy := . }}
+      <a href="{{ printf " tags/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-pill tag-pill">
+        #{{ $name }} <span class="count">({{ $taxonomy.Count }})</span>
+      </a>
+      {{ end }}
+    </div>
     {{ end }}
   </div>
 
@@ -44,54 +44,54 @@
   <div class="post-list posts-list">
     {{ $pages := .Pages }}
     {{ if .IsHome }}
-      {{ $pages = where site.RegularPages "Type" "in" (slice "posts" "post") }}
+    {{ $pages = where site.RegularPages "Type" "in" (slice "posts" "post") }}
     {{ end }}
     {{ $paginator := .Paginate $pages }}
 
     {{ range $paginator.Pages }}
-      <article class="post-card">
-        <div class="post-card-meta">
-          <time datetime="{{ .Date.Format "2006-01-02" }}" class="post-card-date">
-            {{ .Date.Format "2006-01-02" }}
-          </time>
-          {{ with .Params.categories }}
-            {{ range first 1 . }}
-              <span class="post-card-category">{{ . }}</span>
-            {{ end }}
-          {{ end }}
-          {{ if .Draft }}
-            <span class="badge draft-badge-small">{{ i18n "draft_badge" }}</span>
-          {{ end }}
-        </div>
-
-        <h2 class="post-card-title">
-          <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-        </h2>
-
-        <p class="post-card-summary">
-          {{ with .Description }}
-            {{ . }}
-          {{ else }}
-            {{ .Summary | plainify | truncate 160 }}
-          {{ end }}
-        </p>
-
-        <div class="post-card-footer">
-          <div class="post-card-tags">
-            {{ with .Params.tags }}
-              {{ range first 3 . }}
-                <span class="tag-badge">#{{ . }}</span>
-              {{ end }}
-            {{ end }}
-          </div>
-          <span class="reading-time-text">{{ .ReadingTime }} {{ i18n "minute" }}</span>
-        </div>
-      </article>
-    {{ else }}
-      <div class="empty-state">
-        <p>{{ i18n "no_posts" }}</p>
-        <a href="{{ "editor/" | relURL }}" class="button primary-btn">{{ i18n "nav_editor" }}</a>
+    <article class="post-card">
+      <div class="post-card-meta">
+        <time datetime="{{ .Date.Format " 2006-01-02" }}" class="post-card-date">
+          {{ .Date.Format "2006-01-02" }}
+        </time>
+        {{ with .Params.categories }}
+        {{ range first 1 . }}
+        <span class="post-card-category">{{ . }}</span>
+        {{ end }}
+        {{ end }}
+        {{ if .Draft }}
+        <span class="badge draft-badge-small">{{ i18n "draft_badge" }}</span>
+        {{ end }}
       </div>
+
+      <h2 class="post-card-title">
+        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+      </h2>
+
+      <p class="post-card-summary">
+        {{ with .Description }}
+        {{ . }}
+        {{ else }}
+        {{ .Summary | plainify | truncate 160 }}
+        {{ end }}
+      </p>
+
+      <div class="post-card-footer">
+        <div class="post-card-tags">
+          {{ with .Params.tags }}
+          {{ range first 3 . }}
+          <span class="tag-badge">#{{ . }}</span>
+          {{ end }}
+          {{ end }}
+        </div>
+        <span class="reading-time-text">{{ .ReadingTime }} {{ i18n "minute" }}</span>
+      </div>
+    </article>
+    {{ else }}
+    <div class="empty-state">
+      <p>{{ i18n "no_posts" }}</p>
+      <a href="{{ site.Home.RelPermalink }}" class="button primary-btn">{{ i18n "home" }}</a>
+    </div>
     {{ end }}
   </div>
 

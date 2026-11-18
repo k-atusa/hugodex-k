@@ -5,6 +5,10 @@ defaultContentLanguageInSubdir: false
 enableRobotsTXT: true
 summaryLength: 50
 
+# Exclude local editor from production build
+ignoreFiles:
+  - "/editor/"
+
 # Taxonomies
 taxonomies:
   category: categories
@@ -33,10 +37,6 @@ languages:
           name: "태그"
           url: "/tags/"
           weight: 30
-        - identifier: editor
-          name: "웹 에디터"
-          url: "/editor/"
-          weight: 40
   en:
     languageName: "English"
     languageCode: "en-us"
@@ -58,10 +58,6 @@ languages:
           name: "Tags"
           url: "/en/tags/"
           weight: 30
-        - identifier: editor
-          name: "Web Editor"
-          url: "/editor/"
-          weight: 40
 
 # Markup Configuration
 markup:
@@ -102,7 +98,7 @@ params:
   math: true
   mermaid: true
 
-# Top-level Menu
+# Top-level Menu Fallback
 menu:
   main:
     - identifier: posts
@@ -117,7 +113,3 @@ menu:
       name: "태그"
       url: "/tags/"
       weight: 30
-    - identifier: editor
-      name: "웹 에디터"
-      url: "/editor/"
-      weight: 40
