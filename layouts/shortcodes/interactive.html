@@ -1,36 +1,12 @@
 {{- $id := .Get "id" | default (printf "interactive-%d" (now.UnixNano)) -}}
-{{- $height := .Get "height" | default "400px" -}}
-{{- $title := .Get "title" | default "Interactive Component" -}}
-{{- $js := .Get "js" -}}
-{{- $css := .Get "css" -}}
+{{- $height := .Get "height" -}}
+{{- $title := .Get "title" -}}
 
-<div class="interactive-wrap" id="{{ $id }}">
-  <div class="interactive-header sandbox-toolbar">
-    <span class="interactive-title sandbox-badge">
-      <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-      </svg>
-      {{ $title }}
-    </span>
-    <button class="interactive-reload-btn sandbox-reset-btn" type="button" onclick="(function(){var f=document.getElementById('{{ $id }}-frame');if(f){var s=f.srcdoc;f.srcdoc='';f.srcdoc=s;}})()" title="다시 실행">
-      다시 실행
-    </button>
+<div class="interactive-block" id="{{ $id }}">
+  {{ with $title }}
+    <div class="interactive-caption">{{ . }}</div>
+  {{ end }}
+  <div class="interactive-body" {{ with $height }}style="min-height: {{ . }};"{{ end }}>
+    {{ .Inner | safeHTML }}
   </div>
-  <iframe id="{{ $id }}-frame" class="interactive-frame sandbox-frame" style="width: 100%; height: {{ $height }}; border: none; background: var(--bg-card, #ffffff);"
-    sandbox="allow-scripts allow-same-origin"
-    srcdoc="<!DOCTYPE html>
-<html>
-<head>
-  <meta charset='utf-8'>
-  <style>
-    body { margin: 0; padding: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #24292f; background: transparent; }
-    @media (prefers-color-scheme: dark) { body { color: #c9d1d9; } }
-    {{ with $css }}{{ . | safeCSS }}{{ end }}
-  </style>
-</head>
-<body>
-  {{ .Inner | safeHTML }}
-  {{ with $js }}<script>{{ . | safeJS }}</script>{{ end }}
-</body>
-</html>"></iframe>
 </div>

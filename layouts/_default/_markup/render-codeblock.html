@@ -1,0 +1,9 @@
+<div class="code-block" data-lang="{{ .Type | default "text" }}">
+  <div class="code-header">
+    <span class="code-lang">{{ .Type | default "text" }}</span>
+    <button type="button" class="copy-code-btn" aria-label="Copy code">
+      <span class="copy-text">Copy</span>
+    </button>
+  </div>
+  {{ transform.HighlightCodeBlock . }}
+</div>

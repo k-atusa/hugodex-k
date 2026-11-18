@@ -1,101 +1,84 @@
 {{ define "main" }}
-<div class="list-container container">
+<div class="list-layout">
   <header class="list-header">
     <h1 class="list-title">
       {{ if eq .Data.Singular "category" }}
-      <span class="list-prefix">{{ i18n "category_list" }}:</span> {{ .Title }}
+        <span class="list-label">{{ i18n "category_list" }}:</span> {{ .Title }}
       {{ else if eq .Data.Singular "tag" }}
-      <span class="list-prefix">{{ i18n "tag_list" }}:</span> #{{ .Title }}
+        <span class="list-label">{{ i18n "tag_list" }}:</span> #{{ .Title }}
       {{ else }}
-      {{ .Title }}
+        {{ .Title }}
       {{ end }}
     </h1>
     {{ with .Description }}
-    <p class="list-description">{{ . }}</p>
+      <p class="list-desc">{{ . }}</p>
     {{ end }}
   </header>
 
-  {{/* Category/Tag Filter Bar */}}
-  <div class="taxonomy-bar">
+  {{/* Category/Tag Navigation */}}
+  <div class="taxonomy-nav">
     {{ with site.Taxonomies.categories }}
-    <div class="taxonomy-group">
-      <span class="taxonomy-title">{{ i18n "category_list" }}:</span>
-      {{ range $name, $taxonomy := . }}
-      <a href="{{ printf " categories/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-pill">
-        {{ $name }} <span class="count">({{ $taxonomy.Count }})</span>
-      </a>
-      {{ end }}
-    </div>
+      <div class="taxonomy-row">
+        <span class="taxonomy-name">{{ i18n "category_list" }}:</span>
+        {{ range $name, $taxonomy := . }}
+          <a href="{{ printf "categories/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-link">
+            {{ $name }} <span class="num">({{ $taxonomy.Count }})</span>
+          </a>
+        {{ end }}
+      </div>
     {{ end }}
 
     {{ with site.Taxonomies.tags }}
-    <div class="taxonomy-group">
-      <span class="taxonomy-title">{{ i18n "tag_list" }}:</span>
-      {{ range $name, $taxonomy := . }}
-      <a href="{{ printf " tags/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-pill tag-pill">
-        #{{ $name }} <span class="count">({{ $taxonomy.Count }})</span>
-      </a>
-      {{ end }}
-    </div>
+      <div class="taxonomy-row">
+        <span class="taxonomy-name">{{ i18n "tag_list" }}:</span>
+        {{ range $name, $taxonomy := . }}
+          <a href="{{ printf "tags/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-link">
+            #{{ $name }} <span class="num">({{ $taxonomy.Count }})</span>
+          </a>
+        {{ end }}
+      </div>
     {{ end }}
   </div>
 
-  {{/* Post cards */}}
-  <div class="post-list posts-list">
+  {{/* Posts stream */}}
+  <div class="posts-stream">
     {{ $pages := .Pages }}
     {{ if .IsHome }}
-    {{ $pages = where site.RegularPages "Type" "in" (slice "posts" "post") }}
+      {{ $pages = where site.RegularPages "Type" "in" (slice "posts" "post") }}
     {{ end }}
     {{ $paginator := .Paginate $pages }}
 
     {{ range $paginator.Pages }}
-    <article class="post-card">
-      <div class="post-card-meta">
-        <time datetime="{{ .Date.Format " 2006-01-02" }}" class="post-card-date">
+      <article class="post-row">
+        <time datetime="{{ .Date.Format "2006-01-02" }}" class="post-row-date">
           {{ .Date.Format "2006-01-02" }}
         </time>
-        {{ with .Params.categories }}
-        {{ range first 1 . }}
-        <span class="post-card-category">{{ . }}</span>
-        {{ end }}
-        {{ end }}
-        {{ if .Draft }}
-        <span class="badge draft-badge-small">{{ i18n "draft_badge" }}</span>
-        {{ end }}
-      </div>
-
-      <h2 class="post-card-title">
-        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-      </h2>
-
-      <p class="post-card-summary">
-        {{ with .Description }}
-        {{ . }}
-        {{ else }}
-        {{ .Summary | plainify | truncate 160 }}
-        {{ end }}
-      </p>
-
-      <div class="post-card-footer">
-        <div class="post-card-tags">
-          {{ with .Params.tags }}
-          {{ range first 3 . }}
-          <span class="tag-badge">#{{ . }}</span>
+        <div class="post-row-content">
+          <h2 class="post-row-title">
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+            {{ if .Draft }}
+              <span class="draft-tag">{{ i18n "draft_badge" }}</span>
+            {{ end }}
+          </h2>
+          {{ with .Description }}
+            <p class="post-row-summary">{{ . }}</p>
+          {{ else }}
+            <p class="post-row-summary">{{ .Summary | plainify | truncate 140 }}</p>
           {{ end }}
+          {{ with .Params.tags }}
+            <div class="post-row-tags">
+              {{ range first 3 . }}
+                <span class="tag-item">#{{ . }}</span>
+              {{ end }}
+            </div>
           {{ end }}
         </div>
-        <span class="reading-time-text">{{ .ReadingTime }} {{ i18n "minute" }}</span>
-      </div>
-    </article>
+      </article>
     {{ else }}
-    <div class="empty-state">
-      <p>{{ i18n "no_posts" }}</p>
-      <a href="{{ site.Home.RelPermalink }}" class="button primary-btn">{{ i18n "home" }}</a>
-    </div>
+      <p class="empty-text">{{ i18n "no_posts" }}</p>
     {{ end }}
   </div>
 
-  {{/* Pagination */}}
   {{ template "_internal/pagination.html" . }}
 </div>
 {{ end }}

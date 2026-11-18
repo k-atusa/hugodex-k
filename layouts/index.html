@@ -1,94 +1,41 @@
 {{ define "main" }}
-<div class="home-container container">
-  {{/* Hero section (homepage only) */}}
-  <section class="hero hero-section">
-    <div class="hero-content">
-      <div class="hero-badge">Hugo + LaTeX + Mermaid</div>
-      <h1 class="hero-title">{{ site.Title }}</h1>
-      <p class="hero-subtitle">{{ site.Params.description }}</p>
-      <div class="hero-actions">
-        <a href="{{ "posts/" | relLangURL }}" class="button primary-btn">{{ i18n "nav_posts" }} 둘러보기</a>
-        <a href="{{ "categories/" | relLangURL }}" class="button secondary-btn">{{ i18n "nav_categories" }} 둘러보기</a>
-      </div>
-    </div>
-  </section>
+<div class="home-layout">
+  <header class="home-intro">
+    <h1 class="home-title">{{ site.Title }}</h1>
+    {{ with site.Params.description }}
+      <p class="home-desc">{{ . }}</p>
+    {{ end }}
+  </header>
 
-  {{/* Features grid (4 cards) */}}
-  <section class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon math-icon">∑</div>
-      <h3 class="feature-title">고급 수학 (LaTeX)</h3>
-      <p class="feature-desc">KaTeX 로컬 엔진을 통해 인라인 수식과 복잡한 행렬, 미적분, 텐서 수식을 실시간 렌더링합니다.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon diagram-icon">❖</div>
-      <h3 class="feature-title">구조도 (Mermaid)</h3>
-      <p class="feature-desc">순서도, 시퀀스 다이어그램, 클래스 구조도, Git 브랜치 맵을 외부 서버 없이 즉시 시각화합니다.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon code-icon">&lt;/&gt;</div>
-      <h3 class="feature-title">프로그래밍 & 코드</h3>
-      <p class="feature-desc">Chroma 정적 컴파일러를 통해 초고속 코드 하이라이팅, 줄 번호, 원클릭 복사 기능을 제공합니다.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon cdn-icon">⚡</div>
-      <h3 class="feature-title">외부 CDN 의존성 제로</h3>
-      <p class="feature-desc">필수 폰트와 라이브러리를 자체 번들링하여 외부 의존성 없이 초고속으로 페이지를 서빙합니다.</p>
-    </div>
-  </section>
-
-  {{/* Recent posts (last 6) */}}
-  <section class="recent-posts-section">
-    <div class="section-header">
-      <h2 class="section-title">{{ i18n "recent_posts" }}</h2>
-      <a href="{{ "posts/" | relLangURL }}" class="section-more-link">{{ i18n "view_all" }} &rarr;</a>
-    </div>
-
-    <div class="post-list posts-list">
-      {{ range first 6 (where site.RegularPages "Type" "in" (slice "posts" "post")) }}
-        <article class="post-card">
-          <div class="post-card-meta">
-            <time datetime="{{ .Date.Format "2006-01-02" }}" class="post-card-date">
-              {{ .Date.Format "2006-01-02" }}
-            </time>
-            {{ with .Params.categories }}
-              {{ range first 1 . }}
-                <span class="post-card-category">{{ . }}</span>
+  <section class="home-posts">
+    <div class="posts-stream">
+      {{ $pages := where site.RegularPages "Type" "in" (slice "posts" "post") }}
+      {{ range $pages }}
+        <article class="post-row">
+          <time datetime="{{ .Date.Format "2006-01-02" }}" class="post-row-date">
+            {{ .Date.Format "2006-01-02" }}
+          </time>
+          <div class="post-row-content">
+            <h2 class="post-row-title">
+              <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+              {{ if .Draft }}
+                <span class="draft-tag">{{ i18n "draft_badge" }}</span>
               {{ end }}
-            {{ end }}
-            {{ if .Draft }}
-              <span class="badge draft-badge-small">{{ i18n "draft_badge" }}</span>
-            {{ end }}
-          </div>
-
-          <h3 class="post-card-title">
-            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-          </h3>
-
-          <p class="post-card-summary">
+            </h2>
             {{ with .Description }}
-              {{ . }}
-            {{ else }}
-              {{ .Summary | plainify | truncate 140 }}
+              <p class="post-row-summary">{{ . }}</p>
             {{ end }}
-          </p>
-
-          <div class="post-card-footer">
-            <div class="post-card-tags">
-              {{ with .Params.tags }}
+            {{ with .Params.tags }}
+              <div class="post-row-tags">
                 {{ range first 3 . }}
-                  <span class="tag-badge">#{{ . }}</span>
+                  <span class="tag-item">#{{ . }}</span>
                 {{ end }}
-              {{ end }}
-            </div>
-            <span class="reading-time-text">{{ .ReadingTime }} {{ i18n "minute" }}</span>
+              </div>
+            {{ end }}
           </div>
         </article>
       {{ else }}
-        <div class="empty-state">
-          <p>{{ i18n "no_posts" }}</p>
-          <a href="{{ site.Home.RelPermalink }}" class="button primary-btn">{{ i18n "home" }}</a>
-        </div>
+        <p class="empty-text">{{ i18n "no_posts" }}</p>
       {{ end }}
     </div>
   </section>

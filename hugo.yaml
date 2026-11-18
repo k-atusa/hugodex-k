@@ -1,11 +1,11 @@
 baseURL: "/"
-title: "hugodex-k"
+title: "Blog"
 defaultContentLanguage: "ko"
 defaultContentLanguageInSubdir: false
 enableRobotsTXT: true
-summaryLength: 50
+summaryLength: 60
 
-# Exclude local editor from production build
+# Exclude local editor SPA from production build
 ignoreFiles:
   - "/editor/"
 
@@ -14,19 +14,19 @@ taxonomies:
   category: categories
   tag: tags
 
-# Languages (ko weight 1, en weight 2)
+# Languages
 languages:
   ko:
     languageName: "한국어"
     languageCode: "ko-kr"
     weight: 1
-    title: "hugodex-k"
+    title: "Blog"
     params:
-      description: "프로그래밍, 고급 수학, 구조도 다이어그램 정적 지식 블로그"
+      description: "엔지니어링, 프로그래밍, 수학 노트"
     menu:
       main:
         - identifier: posts
-          name: "포스트"
+          name: "글 목록"
           url: "/posts/"
           weight: 10
         - identifier: categories
@@ -41,9 +41,9 @@ languages:
     languageName: "English"
     languageCode: "en-us"
     weight: 2
-    title: "hugodex-k (EN)"
+    title: "Blog (EN)"
     params:
-      description: "Static knowledge blog specialized in programming, advanced mathematics, and system diagrams"
+      description: "Engineering, programming and mathematics notes"
     menu:
       main:
         - identifier: posts
@@ -59,11 +59,11 @@ languages:
           url: "/en/tags/"
           weight: 30
 
-# Markup Configuration
+# Markdown & Syntax Highlighting
 markup:
   goldmark:
     renderer:
-      unsafe: true
+      unsafe: true # raw inline HTML 허용
     extensions:
       passthrough:
         enable: true
@@ -82,10 +82,9 @@ markup:
   highlight:
     codeFences: true
     guessSyntax: true
-    lineNos: true
-    lineNumbersInTable: true
-    noClasses: false
-    style: "monokai"
+    lineNos: false # GitHub 마크다운처럼 기본 줄번호 없이 깔끔하게
+    noClasses: false # CSS 클래스 기반 하이라이팅
+    style: "github"
   tableOfContents:
     startLevel: 2
     endLevel: 4
@@ -93,8 +92,8 @@ markup:
 
 # Site Params
 params:
-  siteName: "hugodex-k"
-  copyright: "© 2026 hugodex-k. All rights reserved."
+  siteName: "Blog"
+  copyright: "© 2026. All rights reserved."
   math: true
   mermaid: true
 
@@ -102,7 +101,7 @@ params:
 menu:
   main:
     - identifier: posts
-      name: "포스트"
+      name: "글 목록"
       url: "/posts/"
       weight: 10
     - identifier: categories

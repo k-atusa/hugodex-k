@@ -60,10 +60,15 @@
         }
       }
       if (!text) return;
+      var textSpan = btn.querySelector('.copy-text') || btn;
+      var original = textSpan.textContent;
       navigator.clipboard.writeText(text).then(function () {
-        btn.textContent = '✓';
+        textSpan.textContent = 'Copied!';
         btn.classList.add('copied');
-        setTimeout(function () { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1500);
+        setTimeout(function () {
+          textSpan.textContent = original;
+          btn.classList.remove('copied');
+        }, 1800);
       });
     });
   }
