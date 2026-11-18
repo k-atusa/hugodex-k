@@ -357,7 +357,7 @@ fn quicksort<T: Ord + Clone>(slice: &[T]) -> Vec<T> {
 
 ## 5. 인라인 SVG 벡터 그래픽 검증
 
-Hugo 단축코드 `{{< svg-inline >}}`를 활용한 기하학적 벡터 도형:
+Hugo 단축코드 `{{</* svg-inline */>}}`를 활용한 기하학적 벡터 도형:
 
 {{< svg-inline >}}
 <svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" style="max-width: 100%; height: auto; display: block; margin: 0 auto; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-color);">

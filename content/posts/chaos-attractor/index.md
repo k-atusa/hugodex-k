@@ -30,7 +30,7 @@ $$
 
 ## 2. 마크다운 내장 실시간 인터랙티브 시뮬레이션
 
-아래 영역은 `hugodex-k`의 `{{< interactive >}}` 확장 단축코드를 통해 마크다운 내부에 안전하게 격리된 HTML5 캔버스와 JavaScript 엔진으로 구동되는 **실시간 로렌츠 끌개 3D 투영 궤적**입니다.
+아래 영역은 `hugodex-k`의 `{{</* interactive */>}}` 확장 단축코드를 통해 마크다운 내부에 안전하게 격리된 HTML5 캔버스와 JavaScript 엔진으로 구동되는 **실시간 로렌츠 끌개 3D 투영 궤적**입니다.
 
 {{< interactive id="lorenz-sim" height="340px" title="로렌츠 끌개(Lorenz Attractor) 실시간 궤적" >}}
 <style>
