@@ -58,7 +58,9 @@
               {{ .Date.Format "2006-01-02" }}
             </time>
             {{ with .Params.categories }}
-              <span class="post-card-category">{{ index . 0 }}</span>
+              {{ range first 1 . }}
+                <span class="post-card-category">{{ . }}</span>
+              {{ end }}
             {{ end }}
             {{ if .Draft }}
               <span class="badge draft-badge-small">{{ i18n "draft_badge" }}</span>
@@ -79,8 +81,10 @@
 
           <div class="post-card-footer">
             <div class="post-card-tags">
-              {{ range first 3 .Params.tags }}
-                <span class="tag-badge">#{{ . }}</span>
+              {{ with .Params.tags }}
+                {{ range first 3 . }}
+                  <span class="tag-badge">#{{ . }}</span>
+                {{ end }}
               {{ end }}
             </div>
             <span class="reading-time-text">{{ .ReadingTime }} {{ i18n "minute" }}</span>
