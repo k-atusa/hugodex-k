@@ -1,4 +1,17 @@
 {{ define "main" }}
+{{ $category := "" }}
+{{ with .Params.category }}
+  {{ $category = . }}
+{{ else }}
+  {{ with .Params.categories }}
+    {{ if reflect.IsSlice . }}
+      {{ $category = index . 0 }}
+    {{ else }}
+      {{ $category = . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
 <article class="post-single">
   {{/* Post Header */}}
   <header class="post-header">
@@ -6,14 +19,14 @@
       <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}" class="post-date">
         {{ .Date.Format "2006-01-02" }}
       </time>
-      {{ with .Params.categories }}
+      {{ if $category }}
         <span class="meta-sep">/</span>
-        {{ range . }}
-          <a href="{{ printf "categories/%s/" (. | urlize) | relLangURL }}" class="post-category">{{ . }}</a>
-        {{ end }}
+        <a href="{{ printf "categories/%s/" ($category | urlize) | relLangURL }}" class="post-category">
+          📁 {{ $category }}
+        </a>
       {{ end }}
       {{ if .Draft }}
-        <span class="draft-tag">{{ i18n "draft_badge" }}</span>
+        <span class="visibility-badge hidden">{{ i18n "hidden_badge" | default "비공개" }}</span>
       {{ end }}
     </div>
 

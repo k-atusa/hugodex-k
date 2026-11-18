@@ -1,0 +1,76 @@
+{{ $category := "" }}
+{{ with .Params.category }}
+  {{ $category = . }}
+{{ else }}
+  {{ with .Params.categories }}
+    {{ if reflect.IsSlice . }}
+      {{ $category = index . 0 }}
+    {{ else }}
+      {{ $category = . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ $thumbUrl := "" }}
+{{ $img := "" }}
+{{ with .Params.thumbnail }}
+  {{ $img = $.Resources.GetMatch . }}
+{{ else with .Params.image }}
+  {{ $img = $.Resources.GetMatch . }}
+{{ else }}
+  {{ $images := .Resources.ByType "image" }}
+  {{ if gt (len $images) 0 }}
+    {{ $img = index $images 0 }}
+  {{ end }}
+{{ end }}
+
+{{ if $img }}
+  {{/* 256x256 저화질 고속 썸네일 생성 */}}
+  {{ $processed := $img.Fill "256x256 webp q75" }}
+  {{ if $processed }}
+    {{ $thumbUrl = $processed.RelPermalink }}
+  {{ else }}
+    {{ $thumbUrl = $img.RelPermalink }}
+  {{ end }}
+{{ end }}
+
+<article class="post-card {{ if $thumbUrl }}has-thumb{{ else }}no-thumb{{ end }}">
+  {{ if $thumbUrl }}
+    <div class="post-card-thumb-wrap">
+      <a href="{{ .RelPermalink }}" tabindex="-1" aria-hidden="true" class="post-thumb-link">
+        <img src="{{ $thumbUrl }}" alt="{{ .Title }}" width="256" height="256" loading="lazy" decoding="async" class="post-card-thumb">
+      </a>
+    </div>
+  {{ end }}
+
+  <div class="post-card-body">
+    <div class="post-card-meta">
+      <time datetime="{{ .Date.Format "2006-01-02" }}" class="post-card-date">
+        {{ .Date.Format "2006-01-02" }}
+      </time>
+
+      {{ if $category }}
+        <span class="meta-sep">/</span>
+        <a href="{{ printf "categories/%s/" ($category | urlize) | relLangURL }}" class="post-card-category" title="카테고리">
+          📁 {{ $category }}
+        </a>
+      {{ end }}
+
+      {{ if .Draft }}
+        <span class="visibility-badge hidden">{{ i18n "hidden_badge" | default "비공개" }}</span>
+      {{ end }}
+    </div>
+
+    <h2 class="post-card-title">
+      <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+    </h2>
+
+    {{ with .Params.tags }}
+      <div class="post-card-tags">
+        {{ range . }}
+          <a href="{{ printf "tags/%s/" (. | urlize) | relLangURL }}" class="tag-item">#{{ . }}</a>
+        {{ end }}
+      </div>
+    {{ end }}
+  </div>
+</article>

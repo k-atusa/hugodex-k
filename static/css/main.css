@@ -102,11 +102,13 @@ a:hover {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0;
 }
 
 .site-main {
   flex: 1;
-  padding: 2.5rem 0 4rem;
+  padding: 2rem 0 4rem;
+  min-width: 0;
 }
 
 /* ── 3. Header & Navigation ─────────────────────────────── */
@@ -220,9 +222,286 @@ a:hover {
   color: var(--accent);
 }
 
-/* ── 4. Home & Article Feed ─────────────────────────────── */
+/* ── 4. List Toolbar & View Switcher ────────────────────── */
+.list-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.view-switcher {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.view-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+}
+
+.view-btn.active {
+  background: var(--bg-primary);
+  color: var(--accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ── 5. Post Card & 3 View Modes ────────────────────────── */
+.post-card {
+  transition: all 0.15s ease;
+  min-width: 0;
+}
+
+.post-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.post-card-date {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.post-card-category {
+  color: var(--accent);
+  font-weight: 500;
+  font-size: 0.8125rem;
+}
+
+.post-card-category:hover {
+  text-decoration: underline;
+}
+
+.post-card-title {
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.post-card-title a:hover {
+  color: var(--accent);
+}
+
+.post-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tag-item {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.tag-item:hover {
+  text-decoration: underline;
+}
+
+.visibility-badge {
+  font-size: 0.6875rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+}
+
+.visibility-badge.hidden {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.visibility-badge.public {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+
+/* ── MODE 1: 리스트형 (List - No Thumbnails) ─────────────── */
+.posts-stream[data-view="list"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.posts-stream[data-view="list"] .post-card-thumb-wrap {
+  display: none !important;
+}
+
+.posts-stream[data-view="list"] .post-card {
+  padding: 1.125rem 0;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.posts-stream[data-view="list"] .post-card:last-child {
+  border-bottom: none;
+}
+
+.posts-stream[data-view="list"] .post-card-title {
+  font-size: 1.125rem;
+}
+
+/* ── MODE 2: 큰 블록형 (Large Block Grid) ───────────────── */
+.posts-stream[data-view="large-block"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.75rem;
+}
+
+.posts-stream[data-view="large-block"] .post-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.posts-stream[data-view="large-block"] .post-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.posts-stream[data-view="large-block"] .post-card-thumb-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.posts-stream[data-view="large-block"] .post-thumb-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.posts-stream[data-view="large-block"] .post-card-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.posts-stream[data-view="large-block"] .post-card:hover .post-card-thumb {
+  transform: scale(1.03);
+}
+
+.posts-stream[data-view="large-block"] .post-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.625rem;
+}
+
+.posts-stream[data-view="large-block"] .post-card-title {
+  font-size: 1.1875rem;
+  font-weight: 700;
+}
+
+/* ── MODE 3: 작은 블록형 (Small Block Grid) ──────────────── */
+.posts-stream[data-view="small-block"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1.125rem;
+}
+
+.posts-stream[data-view="small-block"] .post-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.posts-stream[data-view="small-block"] .post-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.posts-stream[data-view="small-block"] .post-card-thumb-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.posts-stream[data-view="small-block"] .post-thumb-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.posts-stream[data-view="small-block"] .post-card-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.posts-stream[data-view="small-block"] .post-card:hover .post-card-thumb {
+  transform: scale(1.02);
+}
+
+.posts-stream[data-view="small-block"] .post-card-body {
+  padding: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.4rem;
+}
+
+.posts-stream[data-view="small-block"] .post-card-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.empty-text {
+  color: var(--text-muted);
+  padding: 3rem 0;
+  text-align: center;
+}
+
+/* ── 6. Home Intro & Taxonomy List Page ─────────────────── */
 .home-intro {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border-color);
 }
@@ -239,81 +518,12 @@ a:hover {
   color: var(--text-muted);
 }
 
-.posts-stream {
-  display: flex;
-  flex-direction: column;
-}
-
-.post-row {
-  display: grid;
-  grid-template-columns: 110px 1fr;
-  align-items: baseline;
-  gap: 1.5rem;
-  padding: 1.25rem 0;
-  border-bottom: 1px solid var(--border-color);
-  transition: background 0.15s ease;
-}
-
-.post-row:last-child {
-  border-bottom: none;
-}
-
-.post-row-date {
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-}
-
-.post-row-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-bottom: 0.35rem;
-}
-
-.post-row-summary {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
-}
-
-.post-row-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tag-item {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--accent);
-}
-
-.draft-tag {
-  font-size: 0.6875rem;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-color);
-  color: #ef4444;
-  padding: 0.1rem 0.35rem;
-  border-radius: 3px;
-  vertical-align: middle;
-  margin-left: 0.35rem;
-}
-
-.empty-text {
-  color: var(--text-muted);
-  padding: 3rem 0;
-  text-align: center;
-}
-
-/* ── 5. Taxonomy List Page ──────────────────────────────── */
 .list-layout {
   padding-bottom: 2rem;
 }
 
 .list-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
 }
@@ -333,11 +543,11 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-bottom: 2rem;
-  padding: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.875rem 1rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .taxonomy-row {
@@ -366,9 +576,10 @@ a:hover {
   font-size: 0.75rem;
 }
 
-/* ── 6. Single Post / Article ───────────────────────────── */
+/* ── 7. Single Post / Article ───────────────────────────── */
 .post-single {
   max-width: 100%;
+  min-width: 0;
 }
 
 .post-header {
@@ -385,6 +596,7 @@ a:hover {
   font-size: 0.8125rem;
   color: var(--text-muted);
   margin-bottom: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .post-category {
@@ -402,6 +614,8 @@ a:hover {
   line-height: 1.25;
   letter-spacing: -0.03em;
   margin-bottom: 0.75rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .post-meta-sub {
@@ -412,25 +626,10 @@ a:hover {
   gap: 0.5rem;
 }
 
-.translation-notice {
-  margin-top: 1rem;
-  padding: 0.625rem 0.875rem;
-  background: var(--bg-secondary);
-  border-left: 3px solid var(--accent);
-  font-size: 0.8125rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.translation-link {
-  color: var(--accent);
-  font-weight: 500;
-}
-
 /* Post Content & TOC Grid */
 .post-content-wrap {
   position: relative;
+  min-width: 0;
 }
 
 .toc-sidebar {
@@ -473,11 +672,15 @@ a:hover {
   color: var(--accent);
 }
 
-/* ── 7. Markdown Content Typography ─────────────────────── */
+/* ── 8. Markdown Content Typography & Mobile Overflow Fix ── */
 .markdown-content {
   font-size: 1.0625rem;
   line-height: 1.75;
   color: var(--text-primary);
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .markdown-content > * + * {
@@ -492,12 +695,21 @@ a:hover {
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.3;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .markdown-content h1 { font-size: 1.75rem; margin-top: 3rem; margin-bottom: 1rem; }
 .markdown-content h2 { font-size: 1.375rem; margin-top: 2.5rem; margin-bottom: 0.75rem; padding-bottom: 0.35rem; border-bottom: 1px solid var(--border-color); }
 .markdown-content h3 { font-size: 1.125rem; margin-top: 2rem; margin-bottom: 0.5rem; }
 .markdown-content h4 { font-size: 1rem; margin-top: 1.5rem; }
+
+.markdown-content p,
+.markdown-content li,
+.markdown-content blockquote {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
 
 .markdown-content p {
   margin-bottom: 1.25rem;
@@ -528,9 +740,13 @@ a:hover {
   margin: 1.5rem 0;
 }
 
-/* Tables */
+/* Markdown Tables with Mobile Overflow Scrolling */
 .markdown-content table {
+  display: block;
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-collapse: collapse;
   margin: 1.5rem 0;
   font-size: 0.9375rem;
@@ -541,6 +757,7 @@ a:hover {
   padding: 0.625rem 0.875rem;
   border: 1px solid var(--border-color);
   text-align: left;
+  white-space: nowrap;
 }
 
 .markdown-content th {
@@ -560,15 +777,27 @@ a:hover {
   color: var(--inline-code-color);
   padding: 0.2em 0.4em;
   border-radius: 3px;
+  overflow-wrap: break-word;
+  word-break: break-all;
 }
 
-/* ── 8. GitHub-Style Code Blocks ────────────────────────── */
+/* Markdown Content Images */
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  display: block;
+  margin: 1.75rem auto;
+}
+
+/* ── 9. GitHub-Style Code Blocks ────────────────────────── */
 .code-block {
   margin: 1.75rem 0;
   border: 1px solid var(--code-border);
   border-radius: 6px;
   background: var(--code-bg);
   overflow: hidden;
+  max-width: 100%;
 }
 
 .code-header {
@@ -613,7 +842,29 @@ a:hover {
   background: var(--accent-subtle);
 }
 
-/* ── 9. Math & Diagrams ─────────────────────────────────── */
+.highlight,
+pre {
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── 10. Math & Diagrams Mobile Overflow Fix ─────────────── */
+/* KaTeX Block Equations Horizontal Scroll */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  padding: 0.75rem 0;
+  margin: 1.5rem 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.katex-display > .katex {
+  max-width: 100%;
+  text-align: center;
+}
+
 .math-block {
   margin: 1.75rem 0;
   padding: 1.25rem;
@@ -622,6 +873,7 @@ a:hover {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 4px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mermaid-wrap {
@@ -632,16 +884,42 @@ a:hover {
   border-radius: 4px;
   overflow-x: auto;
   text-align: center;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* ── 10. Callouts (Minimal Monochrome + Green) ──────────── */
+.mermaid svg {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Responsive Direct Inline SVG */
+.markdown-content svg,
+.preview-content svg {
+  max-width: 100% !important;
+  height: auto;
+  display: block;
+  margin: 1.5rem auto;
+}
+
+/* Interactive Inline HTML Component */
+.interactive-widget {
+  margin: 1.75rem 0;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── 11. Callouts (Minimal Monochrome + Green) ──────────── */
 .callout {
   margin: 1.5rem 0;
   padding: 1rem 1.25rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-left: 4px solid var(--accent);
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
 .callout-header {
@@ -667,36 +945,6 @@ a:hover {
   margin-bottom: 0;
 }
 
-/* ── 11. Interactive & SVG ──────────────────────────────── */
-.interactive-block {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background: var(--bg-secondary);
-}
-
-.interactive-caption {
-  font-size: 0.8125rem;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  margin-bottom: 1rem;
-}
-
-.interactive-body {
-  overflow: hidden;
-}
-
-.svg-inline-wrap {
-  margin: 1.75rem 0;
-  text-align: center;
-}
-
-.svg-inline-wrap svg {
-  max-width: 100%;
-  height: auto;
-}
-
 /* ── 12. Tabs Component ─────────────────────────────────── */
 .tabs-container {
   margin: 1.75rem 0;
@@ -709,6 +957,7 @@ a:hover {
   display: flex;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
 }
 
 .tab-btn {
@@ -720,6 +969,7 @@ a:hover {
   font-family: var(--font-mono);
   color: var(--text-muted);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .tab-btn.active {
@@ -828,6 +1078,10 @@ a:hover {
 
 /* ── 15. Responsive ─────────────────────────────────────── */
 @media (max-width: 680px) {
+  .site-wrapper {
+    padding: 0 1rem;
+  }
+
   .site-nav {
     display: none;
     position: absolute;
@@ -852,16 +1106,17 @@ a:hover {
   .mobile-menu-toggle {
     display: inline-flex;
   }
-  
-  .post-row {
+
+  .posts-stream[data-view="large-block"],
+  .posts-stream[data-view="small-block"] {
     grid-template-columns: 1fr;
-    gap: 0.25rem;
+    gap: 1.25rem;
   }
-  
+
   .post-nav {
     grid-template-columns: 1fr;
   }
-  
+
   .post-title {
     font-size: 1.625rem;
   }

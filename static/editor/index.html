@@ -1,430 +1,196 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>hugodex-k 에디터 &amp; 스튜디오</title>
+  <title>hugodex Editor</title>
   <link rel="stylesheet" href="../vendor/katex/katex.min.css">
   <link rel="stylesheet" href="editor.css">
   <script defer src="../vendor/katex/katex.min.js"></script>
   <script defer src="../vendor/katex/contrib/auto-render.min.js"></script>
   <script defer src="../vendor/mermaid/mermaid.min.js"></script>
 </head>
+
 <body class="editor-app">
-  <!-- Top App Navigation Bar -->
-  <header class="app-bar">
-    <div class="app-brand">
-      <a href="../" class="back-home-link" title="블로그 메인으로 이동" id="homeLink">&larr; 블로그</a>
-      <span class="brand-badge">H</span>
-      <h1 class="brand-title">hugodex <strong>Editor</strong></h1>
+  <!-- Top Navigation Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../" class="nav-back-link" title="블로그 메인으로 이동">← 블로그</a>
+      <div class="brand">
+        <span class="brand-badge">H</span>
+        <span class="brand-title">hugodex <strong>Editor</strong></span>
+      </div>
     </div>
 
-    <!-- Active File & Status Indicator -->
-    <div class="active-file-status">
-      <span class="status-dot" id="fileStatusIndicator" title="동기화 상태"></span>
-      <span class="file-name" id="currentFileName">게시글을 선택하세요</span>
-      <span class="status-text" id="statusText">준비됨</span>
-      <span class="badge draft-badge" id="draftBadge" style="display: none;">초안 (Draft)</span>
-      <span class="badge lang-badge" id="langBadge">KO</span>
+    <div class="header-center">
+      <span class="active-slug" id="currentSlugDisplay" title="현재 포스트 슬러그">선택된 글 없음</span>
+
+      <!-- Visibility Toggle Pill (공개 / 비공개) -->
+      <button type="button" class="visibility-toggle public" id="visibilityToggleBtn" title="클릭하여 가시성(공개/비공개) 전환">
+        <span class="vis-dot"></span>
+        <span class="vis-text" id="visibilityText">공개</span>
+      </button>
+
+      <!-- Language Switcher -->
+      <div class="lang-switch-group">
+        <button type="button" class="lang-btn active" data-lang="ko" id="langKoBtn">KO</button>
+        <button type="button" class="lang-btn" data-lang="en" id="langEnBtn">EN</button>
+      </div>
     </div>
 
-    <!-- App Bar Actions -->
-    <div class="app-actions">
-      <button class="btn btn-secondary" id="newPostBtn" title="새로운 게시글 작성">
-        <span class="btn-icon">＋</span> 새 글 작성
-      </button>
-      <button class="btn btn-danger" id="deletePostBtn" title="현재 게시글 폴더 삭제" style="display: none;">
-        <span class="btn-icon">🗑</span> 삭제
-      </button>
-      <button class="btn btn-primary" id="savePostBtn" title="저장 (Ctrl+S)">
-        <span class="btn-icon">💾</span> 저장 <kbd>Ctrl+S</kbd>
-      </button>
+    <div class="header-right">
+      <div class="status-indicator">
+        <span class="status-dot synced" id="syncStatusDot"></span>
+        <span class="status-text" id="syncStatusText">동기화됨</span>
+      </div>
+      <button type="button" class="btn btn-subtle" id="newPostBtn">＋ 새 글</button>
+      <button type="button" class="btn btn-danger" id="deletePostBtn" style="display: none;">🗑 삭제</button>
+      <button type="button" class="btn btn-primary" id="savePostBtn">💾 저장 <kbd>Ctrl+S</kbd></button>
     </div>
   </header>
 
-  <!-- Main Workspace Layout -->
-  <div class="workspace-layout">
-    <!-- Left Sidebar: Post List -->
+  <!-- Main Workspace -->
+  <div class="workspace-body">
+    <!-- Left Sidebar: Post Manager -->
     <aside class="sidebar-pane" id="sidebarPane">
-      <div class="sidebar-header">
-        <div class="sidebar-title-row">
-          <span class="sidebar-title">게시글 목록</span>
-          <span class="post-count-badge" id="sidebarPostCount">0</span>
-          <button class="icon-btn" id="refreshPostsBtn" title="목록 새로고침">↻</button>
+      <div class="sidebar-top">
+        <div class="sidebar-heading">
+          <span class="heading-title">포스트 관리</span>
+          <span class="heading-count" id="sidebarCount">0</span>
         </div>
-        <div class="sidebar-search">
-          <input type="text" id="postSearchInput" placeholder="제목/슬러그 검색..." class="sidebar-search-input">
+        <div class="search-wrap">
+          <input type="text" id="postSearchInput" placeholder="제목 / 슬러그 / 태그 검색..." class="search-input">
         </div>
       </div>
-      <div class="post-list-container" id="postList">
-        <div class="loading-placeholder">게시글 목록 불러오는 중...</div>
+      <div class="post-list-wrap" id="postList">
+        <div class="loading-placeholder">목록 불러오는 중...</div>
       </div>
     </aside>
 
-    <!-- Main Editor Pane -->
+    <!-- Center/Right Editor & Preview -->
     <main class="editor-main-pane">
-      <!-- Front Matter Metadata Form -->
-      <section class="metadata-form-panel">
-        <div class="form-row">
-          <div class="form-group flex-3">
-            <label for="postTitleInput">제목 (Title)</label>
-            <input type="text" id="postTitleInput" placeholder="게시글 제목을 입력하세요" class="form-input">
-          </div>
-          <div class="form-group flex-2">
-            <label for="postSlugInput">슬러그 (Slug)</label>
-            <input type="text" id="postSlugInput" placeholder="post-slug-name" class="form-input" readonly>
-          </div>
-          <div class="form-group flex-1">
-            <label for="postLangSelect">언어 (Language)</label>
-            <select id="postLangSelect" class="form-input form-select">
-              <option value="ko" selected>한국어 (index.md)</option>
-              <option value="en">English (index.en.md)</option>
-            </select>
-          </div>
-          <div class="form-group form-group-toggle">
-            <label for="postDraftCheckbox">초안 여부</label>
-            <label class="toggle-switch">
-              <input type="checkbox" id="postDraftCheckbox">
-              <span class="toggle-slider"></span>
-              <span class="toggle-label" id="draftToggleLabel">발행</span>
-            </label>
-          </div>
+      <!-- Minimalist Metadata Strip -->
+      <section class="metadata-strip">
+        <div class="meta-row-title">
+          <input type="text" id="postTitleInput" placeholder="게시글 제목을 입력하세요" class="title-input">
         </div>
-
-        <div class="form-row">
-          <div class="form-group flex-2">
-            <label for="postCategoriesInput">카테고리 (쉼표로 구분)</label>
-            <input type="text" id="postCategoriesInput" placeholder="Mathematics, Computer Science" class="form-input">
+        <div class="meta-row-details">
+          <div class="meta-field">
+            <span class="field-icon">📁</span>
+            <input type="text" id="postCategoryInput" placeholder="단일 카테고리 (예: 분산 시스템)" class="meta-input">
           </div>
-          <div class="form-group flex-2">
-            <label for="postTagsInput">태그 (쉼표로 구분)</label>
-            <input type="text" id="postTagsInput" placeholder="LaTeX, Mermaid, 알고리즘" class="form-input">
-          </div>
-          <div class="form-group flex-3">
-            <label for="postDescInput">설명 (SEO Description)</label>
-            <input type="text" id="postDescInput" placeholder="검색 엔진 및 소셜 요약 설명" class="form-input">
+          <div class="meta-field flex-2">
+            <span class="field-icon">🏷</span>
+            <input type="text" id="postTagsInput" placeholder="태그 (쉼표로 구분: LaTeX, 알고리즘)" class="meta-input">
           </div>
         </div>
       </section>
 
-      <!-- Markdown & Feature Toolbar -->
+      <!-- Clean Markdown Toolbar -->
       <nav class="editor-toolbar" aria-label="에디터 도구 모음">
         <div class="toolbar-group">
-          <button type="button" class="tb-btn" data-action="h1" title="제목 1 (H1)">H1</button>
           <button type="button" class="tb-btn" data-action="h2" title="제목 2 (H2)">H2</button>
           <button type="button" class="tb-btn" data-action="h3" title="제목 3 (H3)">H3</button>
-        </div>
-
-        <div class="toolbar-divider"></div>
-
-        <div class="toolbar-group">
+          <span class="tb-sep"></span>
           <button type="button" class="tb-btn" data-action="bold" title="굵게 (Ctrl+B)"><strong>B</strong></button>
           <button type="button" class="tb-btn" data-action="italic" title="기울임 (Ctrl+I)"><em>I</em></button>
-          <button type="button" class="tb-btn" data-action="strike" title="취소선"><s>S</s></button>
           <button type="button" class="tb-btn" data-action="quote" title="인용문">&rdquo;</button>
-          <button type="button" class="tb-btn" data-action="code" title="코드 블록 / 인라인">&lt;/&gt;</button>
-        </div>
-
-        <div class="toolbar-divider"></div>
-
-        <div class="toolbar-group">
-          <button type="button" class="tb-btn" data-action="ul" title="글머리 기호 목록">• 목록</button>
-          <button type="button" class="tb-btn" data-action="ol" title="번호 매기기 목록">1. 목록</button>
+          <button type="button" class="tb-btn" data-action="code" title="코드 블록">&lt;/&gt;</button>
+          <button type="button" class="tb-btn" data-action="ul" title="글머리 기호">• 목록</button>
           <button type="button" class="tb-btn" data-action="table" title="표(Table) 삽입">⊞ 표</button>
-          <button type="button" class="tb-btn" data-action="hr" title="구분선 삽입">―</button>
           <button type="button" class="tb-btn" data-action="link" title="링크 삽입">🔗 링크</button>
-          <button type="button" class="tb-btn" data-action="image" id="uploadImageBtn" title="이미지 업로드 및 삽입">🖼 이미지</button>
+          <button type="button" class="tb-btn" data-action="image" id="uploadImageBtn" title="이미지 업로드">🖼 이미지</button>
           <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
         </div>
 
-        <div class="toolbar-divider"></div>
-
-        <!-- Special Feature Visual Buttons -->
-        <div class="toolbar-group feature-buttons">
-          <button type="button" class="tb-btn feature-btn btn-math" id="openMathPaletteBtn" title="LaTeX 수식 팔레트 열기">
-            <span class="btn-symbol">∑</span> LaTeX 수식
+        <div class="toolbar-group">
+          <span class="tb-sep"></span>
+          <button type="button" class="tb-btn insert-math-btn" id="quickMathBtn" title="LaTeX 블록 수식 삽입">
+            <span class="tb-symbol">∑</span> 수식 ($$)
           </button>
-          <button type="button" class="tb-btn feature-btn btn-mermaid" id="openMermaidWizardBtn" title="Mermaid 다이어그램 위자드 열기">
-            <span class="btn-symbol">❖</span> Mermaid 다이어그램
+          <button type="button" class="tb-btn insert-mermaid-btn" id="quickMermaidBtn" title="Mermaid 다이어그램 삽입">
+            <span class="tb-symbol">❖</span> 다이어그램
           </button>
-          <button type="button" class="tb-btn feature-btn btn-callout" id="openCalloutWizardBtn" title="정리/증명/알림 콜아웃 열기">
-            <span class="btn-symbol">💡</span> 콜아웃
+          <button type="button" class="tb-btn insert-callout-btn" id="quickCalloutBtn" title="정리/팁 콜아웃 박스 삽입">
+            <span class="tb-symbol">💡</span> 콜아웃
+          </button>
+          <span class="tb-sep"></span>
+          <button type="button" class="tb-btn insert-svg-btn" id="quickSvgBtn" title="직접 편집 가능한 인라인 SVG 벡터 다이어그램 삽입">
+            <span class="tb-symbol">📐</span> SVG
+          </button>
+          <button type="button" class="tb-btn insert-interactive-btn" id="quickInteractiveBtn" title="실시간 인터랙티브 HTML 컴포넌트 삽입">
+            <span class="tb-symbol">⚡</span> 인터랙티브
           </button>
         </div>
 
-        <!-- Right side tools -->
         <div class="toolbar-group toolbar-group-right">
-          <button type="button" class="tb-btn" id="toggleSplitViewBtn" title="분할/에디터 전용/미리보기 전용 뷰 전환">
+          <button type="button" class="tb-btn" id="splitViewToggleBtn" title="분할/에디터만/미리보기만 전환">
             ◫ 분할 뷰
           </button>
         </div>
       </nav>
 
-      <!-- Split View: Textarea & Live Preview -->
-      <div class="split-view-container" id="splitViewContainer">
-        <!-- Markdown Source Area -->
+      <!-- Split Workspace: Editor & Live Preview -->
+      <div class="split-workspace" id="splitWorkspace">
         <div class="split-pane editor-pane" id="editorPane">
-          <textarea id="markdownEditor" class="editor-textarea" placeholder="여기에 마크다운 본문을 작성하세요... (이미지 파일을 드래그 앤 드롭하거나 붙여넣을 수도 있습니다)" spellcheck="false"></textarea>
+          <textarea id="markdownEditor" class="editor-textarea"
+            placeholder="여기에 마크다운 본문을 작성하세요... (이미지 파일을 붙여넣거나 드래그 앤 드롭할 수 있습니다)" spellcheck="false"></textarea>
         </div>
 
-        <!-- Live Preview Area -->
         <div class="split-pane preview-pane" id="previewPane">
           <div class="preview-header">
-            <span class="preview-title">실시간 렌더링 미리보기</span>
-            <span class="preview-pill">Live Preview</span>
+            <span class="preview-title">실시간 미리보기</span>
+            <span class="preview-badge">Live Preview</span>
           </div>
           <div class="preview-content markdown-body" id="livePreview">
-            <p class="preview-placeholder">본문을 입력하면 실시간으로 렌더링됩니다.</p>
+            <p class="preview-placeholder">본문을 작성하면 실시간 렌더링 결과가 여기에 표시됩니다.</p>
           </div>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Modal 1: LaTeX Math Palette Wizard -->
-  <div class="modal-overlay" id="mathPaletteModal" role="dialog" aria-modal="true" aria-labelledby="mathModalTitle">
-    <div class="modal-window modal-lg">
-      <div class="modal-header">
-        <h3 id="mathModalTitle">∑ LaTeX 수학 공식 팔레트</h3>
-        <button type="button" class="modal-close-btn" aria-label="닫기">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-help-text">원하는 수학 기호 또는 템플릿 버튼을 클릭하면 수식이 자동으로 입력되고 실시간으로 렌더링됩니다.</p>
-
-        <!-- Symbol Palette Tabs -->
-        <div class="palette-tabs">
-          <button type="button" class="palette-tab-btn active" data-tab="templates">구조 템플릿</button>
-          <button type="button" class="palette-tab-btn" data-tab="symbols">연산자 / 기호</button>
-          <button type="button" class="palette-tab-btn" data-tab="greek">그리스 문자</button>
-          <button type="button" class="palette-tab-btn" data-tab="matrices">행렬 / 연립식</button>
-        </div>
-
-        <div class="palette-content" id="paletteContent">
-          <!-- Templates Tab -->
-          <div class="palette-grid tab-section active" id="tab-templates">
-            <button type="button" class="pal-btn" data-latex="\frac{a}{b}">분수 $\frac{a}{b}$</button>
-            <button type="button" class="pal-btn" data-latex="x^{n}">거듭제곱 $x^{n}$</button>
-            <button type="button" class="pal-btn" data-latex="x_{i}">아래첨자 $x_{i}$</button>
-            <button type="button" class="pal-btn" data-latex="\sqrt{x}">근호 $\sqrt{x}$</button>
-            <button type="button" class="pal-btn" data-latex="\int_{a}^{b} f(x) \, dx">정적분 $\int_{a}^{b} f(x) dx$</button>
-            <button type="button" class="pal-btn" data-latex="\sum_{i=1}^{n} x_i">시그마 $\sum_{i=1}^{n} x_i$</button>
-            <button type="button" class="pal-btn" data-latex="\prod_{i=1}^{n} x_i">곱기호 $\prod_{i=1}^{n} x_i$</button>
-            <button type="button" class="pal-btn" data-latex="\lim_{x \to \infty} f(x)">극한 $\lim_{x \to \infty}$</button>
-            <button type="button" class="pal-btn" data-latex="\frac{\partial f}{\partial x}">편미분 $\frac{\partial f}{\partial x}$</button>
-            <button type="button" class="pal-btn" data-latex="\oint_{C} \mathbf{F} \cdot d\mathbf{r}">선적분 $\oint$</button>
-          </div>
-
-          <!-- Symbols Tab -->
-          <div class="palette-grid tab-section" id="tab-symbols">
-            <button type="button" class="pal-btn" data-latex="\pm">$\pm$</button>
-            <button type="button" class="pal-btn" data-latex="\times">$\times$</button>
-            <button type="button" class="pal-btn" data-latex="\div">$\div$</button>
-            <button type="button" class="pal-btn" data-latex="\cdot">$\cdot$</button>
-            <button type="button" class="pal-btn" data-latex="\neq">$\neq$</button>
-            <button type="button" class="pal-btn" data-latex="\approx">$\approx$</button>
-            <button type="button" class="pal-btn" data-latex="\le">$\le$</button>
-            <button type="button" class="pal-btn" data-latex="\ge">$\ge$</button>
-            <button type="button" class="pal-btn" data-latex="\infty">$\infty$</button>
-            <button type="button" class="pal-btn" data-latex="\nabla">$\nabla$</button>
-            <button type="button" class="pal-btn" data-latex="\in">$\in$</button>
-            <button type="button" class="pal-btn" data-latex="\notin">$\notin$</button>
-            <button type="button" class="pal-btn" data-latex="\subset">$\subset$</button>
-            <button type="button" class="pal-btn" data-latex="\cup">$\cup$</button>
-            <button type="button" class="pal-btn" data-latex="\cap">$\cap$</button>
-            <button type="button" class="pal-btn" data-latex="\forall">$\forall$</button>
-            <button type="button" class="pal-btn" data-latex="\exists">$\exists$</button>
-            <button type="button" class="pal-btn" data-latex="\to">$\to$</button>
-            <button type="button" class="pal-btn" data-latex="\implies">$\implies$</button>
-            <button type="button" class="pal-btn" data-latex="\iff">$\iff$</button>
-          </div>
-
-          <!-- Greek Tab -->
-          <div class="palette-grid tab-section" id="tab-greek">
-            <button type="button" class="pal-btn" data-latex="\alpha">$\alpha$</button>
-            <button type="button" class="pal-btn" data-latex="\beta">$\beta$</button>
-            <button type="button" class="pal-btn" data-latex="\gamma">$\gamma$</button>
-            <button type="button" class="pal-btn" data-latex="\delta">$\delta$</button>
-            <button type="button" class="pal-btn" data-latex="\epsilon">$\epsilon$</button>
-            <button type="button" class="pal-btn" data-latex="\theta">$\theta$</button>
-            <button type="button" class="pal-btn" data-latex="\lambda">$\lambda$</button>
-            <button type="button" class="pal-btn" data-latex="\mu">$\mu$</button>
-            <button type="button" class="pal-btn" data-latex="\pi">$\pi$</button>
-            <button type="button" class="pal-btn" data-latex="\rho">$\rho$</button>
-            <button type="button" class="pal-btn" data-latex="\sigma">$\sigma$</button>
-            <button type="button" class="pal-btn" data-latex="\tau">$\tau$</button>
-            <button type="button" class="pal-btn" data-latex="\phi">$\phi$</button>
-            <button type="button" class="pal-btn" data-latex="\omega">$\omega$</button>
-            <button type="button" class="pal-btn" data-latex="\Gamma">$\Gamma$</button>
-            <button type="button" class="pal-btn" data-latex="\Delta">$\Delta$</button>
-            <button type="button" class="pal-btn" data-latex="\Theta">$\Theta$</button>
-            <button type="button" class="pal-btn" data-latex="\Lambda">$\Lambda$</button>
-            <button type="button" class="pal-btn" data-latex="\Sigma">$\Sigma$</button>
-            <button type="button" class="pal-btn" data-latex="\Omega">$\Omega$</button>
-          </div>
-
-          <!-- Matrices Tab -->
-          <div class="palette-grid tab-section" id="tab-matrices">
-            <button type="button" class="pal-btn" data-latex="\begin{pmatrix} a & b \\ c & d \end{pmatrix}">2&times;2 소괄호 행렬</button>
-            <button type="button" class="pal-btn" data-latex="\begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix}">3&times;3 대괄호 행렬</button>
-            <button type="button" class="pal-btn" data-latex="\begin{vmatrix} a & b \\ c & d \end{vmatrix}">2&times;2 행렬식</button>
-            <button type="button" class="pal-btn" data-latex="\begin{cases} ax + by = c \\ dx + ey = f \end{cases}">연립방정식 (cases)</button>
-          </div>
-        </div>
-
-        <!-- Formula Input & Realtime Preview -->
-        <div class="formula-edit-area">
-          <label for="mathFormulaInput">수식 LaTeX 코드:</label>
-          <input type="text" id="mathFormulaInput" class="form-input code-font" value="\int_{0}^{\infty} e^{-x^2} dx = \frac{\sqrt{\pi}}{2}">
-        </div>
-
-        <div class="formula-preview-area">
-          <label>실시간 KaTeX 렌더링 미리보기:</label>
-          <div class="math-preview-box" id="mathPreviewBox"></div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary modal-cancel-btn">취소</button>
-        <button type="button" class="btn btn-secondary" id="insertInlineMathBtn">인라인 수식으로 삽입 ($)</button>
-        <button type="button" class="btn btn-primary" id="insertBlockMathBtn">블록 수식으로 삽입 ($$)</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 2: Mermaid Diagram Wizard -->
-  <div class="modal-overlay" id="mermaidWizardModal" role="dialog" aria-modal="true" aria-labelledby="mermaidModalTitle">
-    <div class="modal-window modal-lg">
-      <div class="modal-header">
-        <h3 id="mermaidModalTitle">❖ Mermaid 다이어그램 위자드</h3>
-        <button type="button" class="modal-close-btn" aria-label="닫기">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="diagram-type-selector">
-          <label>다이어그램 프리셋 선택:</label>
-          <div class="type-cards">
-            <div class="type-card active" data-preset="flowchart">
-              <strong>순서도 (Flowchart)</strong>
-              <span>업무 처리 및 조건 분기</span>
-            </div>
-            <div class="type-card" data-preset="sequence">
-              <strong>시퀀스 (Sequence)</strong>
-              <span>요청/응답 및 API 통신</span>
-            </div>
-            <div class="type-card" data-preset="class">
-              <strong>클래스 (Class)</strong>
-              <span>객체 지향 구조 및 상속</span>
-            </div>
-            <div class="type-card" data-preset="state">
-              <strong>상태도 (State)</strong>
-              <span>상태 머신 및 생애주기</span>
-            </div>
-            <div class="type-card" data-preset="git">
-              <strong>Git 그래프 (GitGraph)</strong>
-              <span>브랜치 및 커밋 흐름</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="diagram-editor-split">
-          <div class="diagram-code-col">
-            <label for="mermaidCodeInput">다이어그램 코드:</label>
-            <textarea id="mermaidCodeInput" class="editor-textarea mini-textarea code-font" spellcheck="false"></textarea>
-          </div>
-          <div class="diagram-preview-col">
-            <label>실시간 다이어그램 미리보기:</label>
-            <div class="diagram-preview-box" id="mermaidPreviewBox"></div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary modal-cancel-btn">취소</button>
-        <button type="button" class="btn btn-primary" id="insertDiagramBtn">본문에 다이어그램 삽입</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 3: Callout Wizard -->
-  <div class="modal-overlay" id="calloutWizardModal" role="dialog" aria-modal="true" aria-labelledby="calloutModalTitle">
-    <div class="modal-window">
-      <div class="modal-header">
-        <h3 id="calloutModalTitle">💡 콜아웃 (학술 정리 / 알림 박스) 삽입</h3>
-        <button type="button" class="modal-close-btn" aria-label="닫기">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="calloutTypeSelect">콜아웃 유형 (6종)</label>
-          <select id="calloutTypeSelect" class="form-input form-select">
-            <option value="theorem">📐 정리 (Theorem)</option>
-            <option value="definition">📖 정의 (Definition)</option>
-            <option value="proof">∎ 증명 (Proof)</option>
-            <option value="note" selected>ℹ 참고 (Note)</option>
-            <option value="tip">💡 팁 (Tip)</option>
-            <option value="warning">⚠ 주의 (Warning)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="calloutTitleInput">제목 (선택사항)</label>
-          <input type="text" id="calloutTitleInput" placeholder="예: 코시-슈바르츠 부등식" class="form-input">
-        </div>
-        <div class="form-group">
-          <label for="calloutContentInput">내용 (마크다운 및 수식 지원)</label>
-          <textarea id="calloutContentInput" class="editor-textarea mini-textarea" placeholder="콜아웃 내부 내용을 입력하세요..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary modal-cancel-btn">취소</button>
-        <button type="button" class="btn btn-primary" id="insertCalloutBtn">콜아웃 삽입</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 4: New Post Dialog Modal -->
+  <!-- New Post Minimal Modal Dialog -->
   <div class="modal-overlay" id="newPostModal" role="dialog" aria-modal="true" aria-labelledby="newPostModalTitle">
-    <div class="modal-window">
+    <div class="modal-box">
       <div class="modal-header">
-        <h3 id="newPostModalTitle">📝 새 게시글 생성</h3>
+        <h3 id="newPostModalTitle">새 글 작성</h3>
         <button type="button" class="modal-close-btn" aria-label="닫기">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label for="newPostSlug">폴더 슬러그 (Slug) <span class="required">*</span></label>
-          <input type="text" id="newPostSlug" placeholder="예: quantum-algorithms" class="form-input" required>
-          <small class="form-help">content/posts/{slug}/ 폴더가 생성됩니다. 영문 소문자, 숫자, 하이픈(-)을 권장합니다.</small>
+        <div class="modal-field">
+          <label for="newPostSlug">슬러그 (영문, 숫자, 하이픈) <span class="req">*</span></label>
+          <input type="text" id="newPostSlug" placeholder="예: quantum-algorithms" class="modal-input" required>
+          <span class="modal-hint">content/posts/{slug}/ 폴더가 생성됩니다.</span>
         </div>
-        <div class="form-group">
-          <label for="newPostTitle">제목 (Title) <span class="required">*</span></label>
-          <input type="text" id="newPostTitle" placeholder="예: 양자 알고리즘 기초와 응용" class="form-input" required>
+        <div class="modal-field">
+          <label for="newPostTitle">제목 <span class="req">*</span></label>
+          <input type="text" id="newPostTitle" placeholder="게시글 제목" class="modal-input" required>
         </div>
-        <div class="form-group">
-          <label for="newPostLang">기본 작성 언어</label>
-          <select id="newPostLang" class="form-input form-select">
+        <div class="modal-field">
+          <label for="newPostCategory">카테고리 (단일)</label>
+          <input type="text" id="newPostCategory" placeholder="예: 분산 시스템" class="modal-input">
+        </div>
+        <div class="modal-field">
+          <label for="newPostLang">작성 언어</label>
+          <select id="newPostLang" class="modal-input modal-select">
             <option value="ko" selected>한국어 (index.md)</option>
             <option value="en">English (index.en.md)</option>
           </select>
         </div>
-        <div class="form-group">
-          <label for="newPostCategories">카테고리</label>
-          <input type="text" id="newPostCategories" placeholder="Computer Science, Quantum" class="form-input">
-        </div>
-        <div class="form-group">
-          <label for="newPostTags">태그</label>
-          <input type="text" id="newPostTags" placeholder="알고리즘, 물리학, 큐비트" class="form-input">
-        </div>
-        <div class="form-group">
-          <label for="newPostDesc">SEO 설명 (Description)</label>
-          <input type="text" id="newPostDesc" placeholder="게시글의 핵심 내용을 요약해주세요." class="form-input">
-        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary modal-cancel-btn">취소</button>
-        <button type="button" class="btn btn-primary" id="submitNewPostBtn">게시글 생성하기</button>
+        <button type="button" class="btn btn-subtle modal-cancel-btn">취소</button>
+        <button type="button" class="btn btn-primary" id="submitNewPostBtn">생성하기</button>
       </div>
     </div>
   </div>
 
-  <!-- Notification Toast -->
-  <div class="toast-notification" id="toastNotification" role="alert" aria-live="assertive"></div>
+  <!-- Toast Notification -->
+  <div class="toast-bar" id="toastBar" role="alert" aria-live="assertive"></div>
 
-  <!-- Editor Script -->
   <script src="editor.js"></script>
 </body>
+
 </html>

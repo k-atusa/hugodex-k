@@ -2,6 +2,7 @@
 """
 hugodex-k Local Development Server & REST API
 Pure Python standard library implementation.
+Zero external dependencies.
 """
 
 import sys
@@ -10,12 +11,11 @@ import re
 import json
 import shutil
 import time
-import socket
 import mimetypes
 import threading
 import webbrowser
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 import urllib.parse
 
@@ -177,8 +177,9 @@ def serialize_yaml(data: dict) -> str:
         "title",
         "date",
         "draft",
-        "tags",
+        "category",
         "categories",
+        "tags",
         "math",
         "mermaid",
         "description",
@@ -204,7 +205,7 @@ def serialize_yaml(data: dict) -> str:
                     items.append(str(item))
             lines.append(f"{key}: [{', '.join(items)}]")
         elif isinstance(val, str):
-            if key in ("title", "description"):
+            if key in ("title", "description", "category"):
                 lines.append(f"{key}: {json.dumps(val, ensure_ascii=False)}")
             elif re.match(r"^\d{4}-\d{2}-\d{2}T", val):
                 lines.append(f"{key}: {val}")
@@ -232,11 +233,9 @@ def find_post_dir(slug: str) -> Path | None:
     """Find post directory by slug under content/posts/."""
     if not POSTS_DIR.exists():
         return None
-    # Direct child
     direct = POSTS_DIR / slug
     if direct.is_dir():
         return direct
-    # Recursive search for existing category subfolders
     for p in POSTS_DIR.rglob(slug):
         if p.is_dir() and p != POSTS_DIR:
             return p
@@ -295,21 +294,49 @@ def scan_all_posts() -> list[dict]:
             date_val = fm.get("date")
             date_str = str(date_val) if date_val is not None else ""
             draft = bool(fm.get("draft", False))
-            categories = fm.get("categories")
-            if not isinstance(categories, list):
-                categories = [categories] if categories else []
+
+            # Single category handling (ensuring folder-like categorization without space splitting)
+            cat_val = fm.get("category")
+            if not cat_val:
+                cats = fm.get("categories")
+                if isinstance(cats, list) and cats:
+                    cat_val = cats[0]
+                elif isinstance(cats, str):
+                    cat_val = cats
+            category = str(cat_val).strip() if cat_val else ""
+
             tags = fm.get("tags")
             if not isinstance(tags, list):
                 tags = [tags] if tags else []
+
+            # Check available languages for this post
+            langs = []
+            if (root_path / "index.md").exists() or (root_path / "index.ko.md").exists():
+                langs.append("ko")
+            if (root_path / "index.en.md").exists():
+                langs.append("en")
+
+            # Check for first image thumbnail
+            thumbnail = None
+            try:
+                for item in sorted(root_path.iterdir()):
+                    if item.is_file() and item.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp", ".gif"):
+                        thumbnail = f"/posts/{slug}/{item.name}"
+                        break
+            except Exception:
+                pass
 
             posts.append({
                 "slug": slug,
                 "title": title,
                 "date": date_str,
                 "draft": draft,
+                "visibility": "hidden" if draft else "public",
                 "lang": lang,
-                "categories": categories,
+                "langs": langs,
+                "category": category,
                 "tags": tags,
+                "thumbnail": thumbnail,
             })
 
     posts.sort(key=lambda p: str(p.get("date", "")), reverse=True)
@@ -317,7 +344,7 @@ def scan_all_posts() -> list[dict]:
 
 
 # -----------------------------------------------------------------------------
-# Multipart/Form-Data Parser (Standard Library Only, Python 3.13 Compatible)
+# Multipart/Form-Data Parser
 # -----------------------------------------------------------------------------
 def parse_multipart(body: bytes, content_type: str) -> list[dict]:
     """Parse multipart/form-data payload into list of uploaded files."""
@@ -362,10 +389,9 @@ def parse_multipart(body: bytes, content_type: str) -> list[dict]:
 # HTTP Request Handler
 # -----------------------------------------------------------------------------
 class DevServerHandler(BaseHTTPRequestHandler):
-    server_version = "hugodex-k/1.0"
+    server_version = "hugodex-k/2.0"
 
     def log_message(self, format, *args):
-        # Clean logging format
         print(f"[{datetime.now().strftime('%H:%M:%S')}] {args[0]} - {args[1]}")
 
     def add_cors_headers(self):
@@ -393,7 +419,6 @@ class DevServerHandler(BaseHTTPRequestHandler):
         """Serve a static file with appropriate Content-Type and CORS headers."""
         try:
             resolved = file_path.resolve()
-            # Ensure path is inside workspace root
             if ROOT_DIR.resolve() not in resolved.parents and resolved != ROOT_DIR.resolve():
                 self.send_json({"error": "Forbidden"}, 403)
                 return
@@ -478,7 +503,23 @@ class DevServerHandler(BaseHTTPRequestHandler):
                 content_str = target_file.read_text(encoding="utf-8", errors="replace")
                 fm, body = parse_post_file(content_str)
                 files = get_post_files_list(post_dir)
-                self.send_json({"frontmatter": fm, "content": body, "files": files}, 200)
+
+                # Thumbnail detection
+                thumbnail = None
+                for f in sorted(post_dir.iterdir()):
+                    if f.is_file() and f.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp", ".gif"):
+                        thumbnail = f"/posts/{slug}/{f.name}"
+                        break
+
+                self.send_json(
+                    {
+                        "frontmatter": fm,
+                        "content": body,
+                        "files": files,
+                        "thumbnail": thumbnail,
+                    },
+                    200,
+                )
             except Exception as e:
                 self.send_json({"error": str(e)}, 500)
             return
@@ -524,15 +565,11 @@ class DevServerHandler(BaseHTTPRequestHandler):
         # 6. Fallback static: GET /*
         rel = path.lstrip("/")
         if not rel:
-            # Root path '/'
-            if (STATIC_DIR / "index.html").exists():
-                self.serve_file(STATIC_DIR / "index.html")
-            else:
-                # Redirect root to editor
-                self.send_response(302)
-                self.send_header("Location", "/editor/")
-                self.add_cors_headers()
-                self.end_headers()
+            # Root path '/' redirects to editor
+            self.send_response(302)
+            self.send_header("Location", "/editor/")
+            self.add_cors_headers()
+            self.end_headers()
             return
 
         target_file = STATIC_DIR / rel
@@ -567,13 +604,12 @@ class DevServerHandler(BaseHTTPRequestHandler):
             slug = body.get("slug", "").strip()
             fm = body.get("frontmatter", {})
             content = body.get("content", "")
+            lang = str(body.get("lang", "ko")).lower()
 
             if not slug:
-                # Infer slug from title
                 title = fm.get("title", "new-post")
                 slug = re.sub(r"[^a-zA-Z0-9가-힣\-_]", "-", str(title)).strip("-").lower() or "new-post"
             else:
-                # Sanitize slug
                 slug = os.path.basename(slug.replace("/", "-").replace("\\", "-"))
 
             post_dir = POSTS_DIR / slug
@@ -584,7 +620,6 @@ class DevServerHandler(BaseHTTPRequestHandler):
             try:
                 post_dir.mkdir(parents=True, exist_ok=True)
 
-                # Set default frontmatter fields if missing
                 if "title" not in fm:
                     fm["title"] = slug
                 if "date" not in fm:
@@ -592,20 +627,27 @@ class DevServerHandler(BaseHTTPRequestHandler):
                     fm["date"] = now.isoformat(timespec="seconds")
                 if "draft" not in fm:
                     fm["draft"] = False
+
+                # Ensure single category
+                category = fm.get("category", "").strip()
+                if not category and fm.get("categories"):
+                    cats = fm.get("categories")
+                    category = cats[0] if isinstance(cats, list) and cats else str(cats)
+                fm["category"] = category
+                fm["categories"] = [category] if category else []
+
                 if "tags" not in fm:
                     fm["tags"] = []
-                if "categories" not in fm:
-                    fm["categories"] = []
 
                 serialized = serialize_yaml(fm) + "\n\n" + content.lstrip("\r\n")
-                target_file = post_dir / "index.md"
+                target_file = post_dir / ("index.en.md" if lang == "en" else "index.md")
                 target_file.write_text(serialized, encoding="utf-8")
 
                 self.send_json(
                     {
                         "success": True,
                         "slug": slug,
-                        "path": f"content/posts/{slug}/index.md",
+                        "path": f"content/posts/{slug}/{target_file.name}",
                     },
                     201,
                 )
@@ -638,7 +680,6 @@ class DevServerHandler(BaseHTTPRequestHandler):
             if "multipart/form-data" in content_type:
                 files = parse_multipart(body_bytes, content_type)
             else:
-                # Raw binary upload fallback with filename in header
                 custom_fn = self.headers.get("X-Filename")
                 if custom_fn:
                     files = [{"filename": os.path.basename(custom_fn), "data": body_bytes}]
@@ -710,11 +751,19 @@ class DevServerHandler(BaseHTTPRequestHandler):
                 post_dir.mkdir(parents=True, exist_ok=True)
 
             try:
+                # Ensure single category and both category/categories keys
+                category = fm.get("category", "").strip()
+                if not category and fm.get("categories"):
+                    cats = fm.get("categories")
+                    category = cats[0] if isinstance(cats, list) and cats else str(cats)
+                category = category.strip()
+                fm["category"] = category
+                fm["categories"] = [category] if category else []
+
                 if lang == "en":
                     target_file = post_dir / "index.en.md"
                 else:
                     target_file = post_dir / "index.md"
-                    # Remove legacy index.ko.md if migrating to index.md
                     legacy_ko = post_dir / "index.ko.md"
                     if legacy_ko.exists() and legacy_ko != target_file:
                         try:
@@ -760,7 +809,6 @@ class DevServerHandler(BaseHTTPRequestHandler):
                 self.send_json({"error": f"Post '{slug}' not found"}, 404)
                 return
 
-            # Safety check: make sure post_dir is inside content/posts and not content/posts itself
             resolved_posts = POSTS_DIR.resolve()
             resolved_target = post_dir.resolve()
             if resolved_target == resolved_posts or resolved_posts not in resolved_target.parents:
@@ -791,7 +839,7 @@ def print_banner(host: str, port: int):
     print("=" * 64)
     print(f"  * Web Editor : {editor_url}")
     print(f"  * REST API   : {api_url}")
-    print(f"  * Root Path  : {ROOT_DIR}")
+    print(f"  * Posts Path : {POSTS_DIR}")
     print("=" * 64)
     print("  Ready! Press Ctrl+C to terminate.")
     print("=" * 64)
@@ -807,7 +855,6 @@ def open_browser_delayed(url: str, delay: float = 0.5):
 
 
 def run_server(port: int = DEFAULT_PORT):
-    # Ensure posts and static folders exist
     POSTS_DIR.mkdir(parents=True, exist_ok=True)
     STATIC_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -822,7 +869,6 @@ def run_server(port: int = DEFAULT_PORT):
 
     print_banner(HOST, port)
 
-    # Launch browser in a background daemon thread
     browser_thread = threading.Thread(
         target=open_browser_delayed,
         args=(f"http://localhost:{port}/editor/", 0.5),

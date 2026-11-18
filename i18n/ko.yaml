@@ -1,42 +1,21 @@
-# 한국어 UI 번역
+# 한국어 UI 번역 (Active Keys Only)
 nav_posts: "포스트"
 nav_categories: "카테고리"
 nav_tags: "태그"
-home: "홈"
-nav_search: "검색"
 
 table_of_contents: "목차"
-published_on: "게시일"
 updated_on: "수정일"
-reading_time: "읽는 시간"
 minute: "분"
-words: "단어"
 
 tag_list: "태그"
 category_list: "카테고리"
-series_list: "시리즈"
-
-share: "공유"
-copy_code: "복사"
-copied: "복사됨!"
-expand_code: "코드 펼치기"
-collapse_code: "코드 접기"
 
 prev_post: "이전 글"
 next_post: "다음 글"
-back_to_list: "목록으로 돌아가기"
-back_to_top: "맨 위로"
-edit_post: "수정"
-recent_posts: "최신 게시글"
-view_all: "전체보기"
 no_posts: "등록된 게시물이 없습니다."
 
-language_switcher: "언어"
-translation_available: "번역본 보기"
-translation_not_available: "이 글의 영문 번역본이 아직 준비되지 않았습니다."
-view_english_version: "English version"
+hidden_badge: "비공개"
 
-draft_badge: "초안"
-footer_powered_by: "구동 엔진: Hugo & GitHub Pages"
-powered_by: "구동 엔진: Hugo & GitHub Pages"
-copyright: "All rights reserved."
+view_list: "리스트"
+view_large: "큰 블록"
+view_small: "작은 블록"

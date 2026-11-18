@@ -32,12 +32,15 @@
   <meta name="twitter:title" content="{{ .Title }}">
   <meta name="twitter:description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Summary }}{{ . }}{{ else }}{{ site.Params.description }}{{ end }}{{ end }}">
 
-  {{/* Inline theme init script before CSS loads */}}
+  {{/* Inline theme and view mode init script before CSS loads */}}
   <script>
     (function () {
       var savedTheme = localStorage.getItem('theme') || localStorage.getItem('hugodex_theme');
       var theme = savedTheme ? savedTheme : 'light';
       document.documentElement.setAttribute('data-theme', theme);
+
+      var savedView = localStorage.getItem('hugodex_view_mode') || 'list';
+      document.documentElement.setAttribute('data-view-mode', savedView);
     })();
   </script>
 

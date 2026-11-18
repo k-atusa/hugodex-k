@@ -1,6 +1,6 @@
 /* ==========================================================================
    Minimalist Engineering Blog Client Scripts
-   Theme, Language Toggle, Infinite Scroll with History State, Copy Code, Tabs
+   Theme, Language Toggle, Infinite Scroll with History State, Copy Code, Tabs, View Switcher
    ========================================================================== */
 
 (function () {
@@ -20,7 +20,6 @@
       localStorage.setItem('theme', next);
 
       reRenderMermaid(next);
-      syncGiscusTheme(next);
     });
   }
 
@@ -42,15 +41,6 @@
     mermaid.run({ nodes: nodes }).catch(function (err) {
       console.warn('Mermaid re-render notice:', err);
     });
-  }
-
-  function syncGiscusTheme(theme) {
-    var iframe = document.querySelector('iframe.giscus-frame');
-    if (!iframe) return;
-    iframe.contentWindow.postMessage(
-      { giscus: { setConfig: { theme: theme === 'dark' ? 'dark' : 'light' } } },
-      'https://giscus.app'
-    );
   }
 
   /* ── 2. Language & Mobile Menu Dropdowns ─────────────────── */
@@ -175,10 +165,10 @@
         .then(function (html) {
           var parser = new DOMParser();
           var doc = parser.parseFromString(html, 'text/html');
-          var newRows = doc.querySelectorAll('#postsStream .post-row');
+          var newCards = doc.querySelectorAll('#postsStream .post-card');
 
-          newRows.forEach(function (row) {
-            stream.appendChild(row);
+          newCards.forEach(function (card) {
+            stream.appendChild(card);
           });
 
           var newTrigger = doc.getElementById('infiniteScrollTrigger');
@@ -242,12 +232,48 @@
     });
   }
 
-  /* ── 6. Init on DOM Ready ────────────────────────────────── */
+  /* ── 6. Post List View Switcher (List / Large / Small) ───── */
+  function initViewSwitcher() {
+    var switcher = document.getElementById('viewSwitcher');
+    var stream = document.getElementById('postsStream');
+    if (!switcher || !stream) return;
+
+    var storageKey = 'hugodex_view_mode';
+    var savedMode = localStorage.getItem(storageKey) || 'list';
+
+    function setViewMode(mode) {
+      if (mode !== 'list' && mode !== 'large-block' && mode !== 'small-block') {
+        mode = 'list';
+      }
+      stream.setAttribute('data-view', mode);
+      switcher.querySelectorAll('.view-btn').forEach(function (btn) {
+        if (btn.getAttribute('data-view') === mode) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      localStorage.setItem(storageKey, mode);
+    }
+
+    // Initialize with saved or default mode
+    setViewMode(savedMode);
+
+    switcher.addEventListener('click', function (e) {
+      var btn = e.target.closest('.view-btn');
+      if (!btn) return;
+      var mode = btn.getAttribute('data-view');
+      if (mode) setViewMode(mode);
+    });
+  }
+
+  /* ── 7. Init on DOM Ready ────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     initThemeToggle();
     initDropdowns();
     initCodeCopyButtons();
     initInfiniteScroll();
     initTabs();
+    initViewSwitcher();
   });
 })();

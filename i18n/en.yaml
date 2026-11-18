@@ -1,42 +1,21 @@
-# English UI Translations
+# English UI Translations (Active Keys Only)
 nav_posts: "Posts"
 nav_categories: "Categories"
 nav_tags: "Tags"
-home: "Home"
-nav_search: "Search"
 
 table_of_contents: "Table of Contents"
-published_on: "Published"
 updated_on: "Updated"
-reading_time: "Reading time"
 minute: "min"
-words: "words"
 
 tag_list: "Tags"
 category_list: "Categories"
-series_list: "Series"
-
-share: "Share"
-copy_code: "Copy"
-copied: "Copied!"
-expand_code: "Expand code"
-collapse_code: "Collapse code"
 
 prev_post: "Previous Post"
 next_post: "Next Post"
-back_to_list: "Back to list"
-back_to_top: "Back to top"
-edit_post: "Edit"
-recent_posts: "Recent Posts"
-view_all: "View all"
 no_posts: "No posts found."
 
-language_switcher: "Language"
-translation_available: "View translation"
-translation_not_available: "This post is currently not available in English."
-view_english_version: "English version"
+hidden_badge: "Hidden"
 
-draft_badge: "Draft"
-footer_powered_by: "Powered by Hugo & GitHub Pages"
-powered_by: "Powered by Hugo & GitHub Pages"
-copyright: "All rights reserved."
+view_list: "List"
+view_large: "Large"
+view_small: "Small"
