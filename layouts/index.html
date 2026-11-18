@@ -8,9 +8,11 @@
   </header>
 
   <section class="home-posts">
-    <div class="posts-stream">
-      {{ $pages := where site.RegularPages "Type" "in" (slice "posts" "post") }}
-      {{ range $pages }}
+    {{ $pages := where site.RegularPages.ByDate.Reverse "Type" "in" (slice "posts" "post") }}
+    {{ $paginator := .Paginate $pages 30 }}
+
+    <div class="posts-stream" id="postsStream">
+      {{ range $paginator.Pages }}
         <article class="post-row">
           <time datetime="{{ .Date.Format "2006-01-02" }}" class="post-row-date">
             {{ .Date.Format "2006-01-02" }}
@@ -37,6 +39,18 @@
       {{ else }}
         <p class="empty-text">{{ i18n "no_posts" }}</p>
       {{ end }}
+    </div>
+
+    {{/* Infinite Scroll Trigger & Loader */}}
+    {{ with $paginator.Next }}
+      <div id="infiniteScrollTrigger" data-next-url="{{ .URL }}"></div>
+      <div id="infiniteScrollLoader" class="infinite-loader">
+        <span class="loader-text">Loading more...</span>
+      </div>
+    {{ end }}
+
+    <div class="pagination-fallback" style="display: none;">
+      {{ template "_internal/pagination.html" . }}
     </div>
   </section>
 </div>

@@ -813,10 +813,44 @@ a:hover {
   color: var(--accent);
 }
 
-/* ── 14. Responsive ─────────────────────────────────────── */
+/* ── 14. Infinite Scroll & Loader ───────────────────────── */
+.infinite-loader {
+  display: none;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.loader-text {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--accent);
+}
+
+/* ── 15. Responsive ─────────────────────────────────────── */
 @media (max-width: 680px) {
   .site-nav {
     display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+    z-index: 90;
+  }
+
+  .site-nav.show {
+    display: block;
+  }
+
+  .site-nav .nav-list {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex;
   }
   
   .post-row {

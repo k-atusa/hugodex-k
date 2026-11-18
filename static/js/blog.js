@@ -1,17 +1,24 @@
-/* hugodex-k blog.js — Theme, Copy, Tabs, Scroll-spy, Mobile */
+/* ==========================================================================
+   Minimalist Engineering Blog Client Scripts
+   Theme, Language Toggle, Infinite Scroll with History State, Copy Code, Tabs
+   ========================================================================== */
+
 (function () {
   'use strict';
 
-  /* ── Theme Toggle ─────────────────────────────────────── */
+  /* ── 1. Theme Toggle ────────────────────────────────────── */
   function initThemeToggle() {
-    const btn = document.getElementById('theme-toggle');
+    var btn = document.getElementById('themeToggleBtn');
     if (!btn) return;
+
     btn.addEventListener('click', function () {
-      const html = document.documentElement;
-      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      var html = document.documentElement;
+      var current = html.getAttribute('data-theme') || 'light';
+      var next = current === 'dark' ? 'light' : 'dark';
+
       html.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
-      btn.setAttribute('aria-label', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+
       reRenderMermaid(next);
       syncGiscusTheme(next);
     });
@@ -21,7 +28,10 @@
     if (typeof mermaid === 'undefined') return;
     var containers = document.querySelectorAll('.mermaid-wrap');
     if (!containers.length) return;
-    mermaid.initialize({ startOnLoad: false, theme: theme === 'dark' ? 'dark' : 'neutral' });
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: theme === 'dark' ? 'dark' : 'neutral'
+    });
     containers.forEach(function (wrap) {
       var src = wrap.getAttribute('data-mermaid-src');
       if (!src) return;
@@ -42,26 +52,56 @@
     );
   }
 
-  /* ── Code Copy Buttons ────────────────────────────────── */
+  /* ── 2. Language & Mobile Menu Dropdowns ─────────────────── */
+  function initDropdowns() {
+    var langBtn = document.getElementById('langToggleBtn');
+    var langMenu = document.getElementById('langMenu');
+
+    if (langBtn && langMenu) {
+      langBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        langMenu.classList.toggle('show');
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!langMenu.contains(e.target) && e.target !== langBtn) {
+          langMenu.classList.remove('show');
+        }
+      });
+    }
+
+    var mobileBtn = document.getElementById('mobileMenuBtn');
+    var headerNav = document.getElementById('headerNav');
+    if (mobileBtn && headerNav) {
+      mobileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        headerNav.classList.toggle('show');
+      });
+    }
+  }
+
+  /* ── 3. Code Copy Buttons ────────────────────────────────── */
   function initCodeCopyButtons() {
     document.addEventListener('click', function (e) {
       var btn = e.target.closest('.copy-code-btn');
       if (!btn) return;
       var block = btn.closest('.code-block') || btn.closest('.mermaid-wrap');
       var text = '';
+
       if (block && block.classList.contains('mermaid-wrap')) {
         text = block.getAttribute('data-mermaid-src') || '';
       } else if (block) {
         var pre = block.querySelector('pre');
         if (pre) {
-          // Chroma with line numbers in table: grab only the code column
           var codeCell = pre.querySelector('td:last-child code');
           text = codeCell ? codeCell.textContent : pre.textContent;
         }
       }
+
       if (!text) return;
       var textSpan = btn.querySelector('.copy-text') || btn;
       var original = textSpan.textContent;
+
       navigator.clipboard.writeText(text).then(function () {
         textSpan.textContent = 'Copied!';
         btn.classList.add('copied');
@@ -73,7 +113,111 @@
     });
   }
 
-  /* ── Tabs ──────────────────────────────────────────────── */
+  /* ── 4. Infinite Scroll with History Preservation ───────── */
+  function initInfiniteScroll() {
+    var stream = document.getElementById('postsStream');
+    var trigger = document.getElementById('infiniteScrollTrigger');
+    var loader = document.getElementById('infiniteScrollLoader');
+    if (!stream || !trigger) return;
+
+    var storageKeyHtml = 'scroll_html_' + window.location.pathname;
+    var storageKeyNext = 'scroll_next_' + window.location.pathname;
+    var storageKeyPos = 'scroll_pos_' + window.location.pathname;
+
+    // Restore state on back navigation
+    var savedHtml = sessionStorage.getItem(storageKeyHtml);
+    var savedNext = sessionStorage.getItem(storageKeyNext);
+    var savedPos = sessionStorage.getItem(storageKeyPos);
+
+    if (savedHtml) {
+      stream.innerHTML = savedHtml;
+      if (savedNext) {
+        trigger.setAttribute('data-next-url', savedNext);
+      } else {
+        trigger.remove();
+        if (loader) loader.remove();
+      }
+      if (savedPos) {
+        setTimeout(function () {
+          window.scrollTo(0, parseInt(savedPos, 10));
+        }, 50);
+      }
+    }
+
+    // Save scroll position before leaving
+    window.addEventListener('beforeunload', function () {
+      sessionStorage.setItem(storageKeyPos, window.scrollY.toString());
+      sessionStorage.setItem(storageKeyHtml, stream.innerHTML);
+      var currentNext = trigger ? trigger.getAttribute('data-next-url') : '';
+      sessionStorage.setItem(storageKeyNext, currentNext || '');
+    });
+
+    var loading = false;
+
+    function loadNextPage() {
+      if (loading || !trigger) return;
+      var nextUrl = trigger.getAttribute('data-next-url');
+      if (!nextUrl) {
+        if (loader) loader.remove();
+        trigger.remove();
+        return;
+      }
+
+      loading = true;
+      if (loader) loader.style.display = 'block';
+
+      fetch(nextUrl)
+        .then(function (res) {
+          if (!res.ok) throw new Error('Network error');
+          return res.text();
+        })
+        .then(function (html) {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          var newRows = doc.querySelectorAll('#postsStream .post-row');
+
+          newRows.forEach(function (row) {
+            stream.appendChild(row);
+          });
+
+          var newTrigger = doc.getElementById('infiniteScrollTrigger');
+          if (newTrigger && newTrigger.getAttribute('data-next-url')) {
+            trigger.setAttribute('data-next-url', newTrigger.getAttribute('data-next-url'));
+          } else {
+            trigger.removeAttribute('data-next-url');
+            trigger.remove();
+            if (loader) loader.remove();
+          }
+
+          // Cache updated state
+          sessionStorage.setItem(storageKeyHtml, stream.innerHTML);
+          sessionStorage.setItem(storageKeyNext, trigger ? (trigger.getAttribute('data-next-url') || '') : '');
+          loading = false;
+          if (loader) loader.style.display = 'none';
+        })
+        .catch(function () {
+          loading = false;
+          if (loader) loader.style.display = 'none';
+        });
+    }
+
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) {
+          loadNextPage();
+        }
+      }, { rootMargin: '300px' });
+      observer.observe(trigger);
+    } else {
+      window.addEventListener('scroll', function () {
+        if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 500)) {
+          loadNextPage();
+        }
+      }, { passive: true });
+    }
+  }
+
+  /* ── 5. Tabs Component ───────────────────────────────────── */
   function initTabs() {
     document.querySelectorAll('.tabs-container').forEach(function (container) {
       var panes = container.querySelectorAll('.tab-pane');
@@ -97,64 +241,12 @@
     });
   }
 
-  /* ── Language Dropdown ─────────────────────────────────── */
-  function initDropdowns() {
-    document.querySelectorAll('.dropdown-toggle').forEach(function (toggle) {
-      toggle.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var menu = toggle.nextElementSibling;
-        if (menu) menu.classList.toggle('show');
-      });
-    });
-    document.addEventListener('click', function () {
-      document.querySelectorAll('.dropdown-menu.show').forEach(function (m) { m.classList.remove('show'); });
-    });
-  }
-
-  /* ── Mobile Menu ───────────────────────────────────────── */
-  function initMobileMenu() {
-    var btn = document.getElementById('mobile-menu-btn');
-    var nav = document.getElementById('nav-menu');
-    if (!btn || !nav) return;
-    btn.addEventListener('click', function () {
-      nav.classList.toggle('open');
-      btn.setAttribute('aria-expanded', nav.classList.contains('open'));
-    });
-  }
-
-  /* ── TOC Scroll-spy ────────────────────────────────────── */
-  function initTOCScrollSpy() {
-    var tocLinks = document.querySelectorAll('.toc-sidebar a');
-    if (!tocLinks.length) return;
-    var headings = [];
-    tocLinks.forEach(function (a) {
-      var id = decodeURIComponent(a.getAttribute('href') || '').replace('#', '');
-      var el = document.getElementById(id);
-      if (el) headings.push({ el: el, link: a });
-    });
-    if (!headings.length) return;
-    var active = null;
-    window.addEventListener('scroll', function () {
-      var scrollY = window.scrollY + 100;
-      var current = headings[0];
-      for (var i = 0; i < headings.length; i++) {
-        if (headings[i].el.offsetTop <= scrollY) current = headings[i];
-      }
-      if (current && current.link !== active) {
-        if (active) active.classList.remove('active');
-        current.link.classList.add('active');
-        active = current.link;
-      }
-    }, { passive: true });
-  }
-
-  /* ── Init ──────────────────────────────────────────────── */
+  /* ── 6. Init on DOM Ready ────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     initThemeToggle();
-    initCodeCopyButtons();
-    initTabs();
     initDropdowns();
-    initMobileMenu();
-    initTOCScrollSpy();
+    initCodeCopyButtons();
+    initInfiniteScroll();
+    initTabs();
   });
 })();

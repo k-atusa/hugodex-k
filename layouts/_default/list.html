@@ -15,38 +15,38 @@
     {{ end }}
   </header>
 
-  {{/* Category/Tag Navigation */}}
+  {{/* Category/Tag Navigation (Alphabetical Order) */}}
   <div class="taxonomy-nav">
-    {{ with site.Taxonomies.categories }}
+    {{ with site.Taxonomies.categories.Alphabetical }}
       <div class="taxonomy-row">
         <span class="taxonomy-name">{{ i18n "category_list" }}:</span>
-        {{ range $name, $taxonomy := . }}
-          <a href="{{ printf "categories/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-link">
-            {{ $name }} <span class="num">({{ $taxonomy.Count }})</span>
+        {{ range . }}
+          <a href="{{ printf "categories/%s/" (.Name | urlize) | relLangURL }}" class="taxonomy-link">
+            {{ .Name }} <span class="num">({{ .Count }})</span>
           </a>
         {{ end }}
       </div>
     {{ end }}
 
-    {{ with site.Taxonomies.tags }}
+    {{ with site.Taxonomies.tags.Alphabetical }}
       <div class="taxonomy-row">
         <span class="taxonomy-name">{{ i18n "tag_list" }}:</span>
-        {{ range $name, $taxonomy := . }}
-          <a href="{{ printf "tags/%s/" ($name | urlize) | relLangURL }}" class="taxonomy-link">
-            #{{ $name }} <span class="num">({{ $taxonomy.Count }})</span>
+        {{ range . }}
+          <a href="{{ printf "tags/%s/" (.Name | urlize) | relLangURL }}" class="taxonomy-link">
+            #{{ .Name }} <span class="num">({{ .Count }})</span>
           </a>
         {{ end }}
       </div>
     {{ end }}
   </div>
 
-  {{/* Posts stream */}}
-  <div class="posts-stream">
-    {{ $pages := .Pages }}
+  {{/* Posts stream (Chronological reverse order, 30 per page) */}}
+  <div class="posts-stream" id="postsStream">
+    {{ $pages := .Pages.ByDate.Reverse }}
     {{ if .IsHome }}
-      {{ $pages = where site.RegularPages "Type" "in" (slice "posts" "post") }}
+      {{ $pages = (where site.RegularPages.ByDate.Reverse "Type" "in" (slice "posts" "post")) }}
     {{ end }}
-    {{ $paginator := .Paginate $pages }}
+    {{ $paginator := .Paginate $pages 30 }}
 
     {{ range $paginator.Pages }}
       <article class="post-row">
@@ -79,6 +79,16 @@
     {{ end }}
   </div>
 
-  {{ template "_internal/pagination.html" . }}
+  {{/* Infinite Scroll Trigger & Loader */}}
+  {{ with $paginator.Next }}
+    <div id="infiniteScrollTrigger" data-next-url="{{ .URL }}"></div>
+    <div id="infiniteScrollLoader" class="infinite-loader">
+      <span class="loader-text">Loading more...</span>
+    </div>
+  {{ end }}
+
+  <div class="pagination-fallback" style="display: none;">
+    {{ template "_internal/pagination.html" . }}
+  </div>
 </div>
 {{ end }}

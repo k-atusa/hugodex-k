@@ -1,9 +1,20 @@
-baseURL: "/"
+# ==============================================================================
+# [사용자 블로그 기본 설정] - 여기를 수정하여 블로그 정보를 변경하세요
+# ==============================================================================
 title: "Blog"
+baseURL: "/"
 defaultContentLanguage: "ko"
 defaultContentLanguageInSubdir: false
 enableRobotsTXT: true
-summaryLength: 60
+paginate: 30                     # 기본 30개 포스트 표시
+
+params:
+  siteName: "Blog"
+  author: "Author"
+  description: "기록과 엔지니어링 노트"
+  copyright: "© 2026. All rights reserved."
+  math: true                     # KaTeX 수식 지원 (필요시 false)
+  mermaid: true                  # Mermaid 다이어그램 지원 (필요시 false)
 
 # Exclude local editor SPA from production build
 ignoreFiles:
@@ -22,7 +33,7 @@ languages:
     weight: 1
     title: "Blog"
     params:
-      description: "엔지니어링, 프로그래밍, 수학 노트"
+      description: "기록과 엔지니어링 노트"
     menu:
       main:
         - identifier: posts
@@ -43,7 +54,7 @@ languages:
     weight: 2
     title: "Blog (EN)"
     params:
-      description: "Engineering, programming and mathematics notes"
+      description: "Engineering and writing notes"
     menu:
       main:
         - identifier: posts
@@ -82,20 +93,13 @@ markup:
   highlight:
     codeFences: true
     guessSyntax: true
-    lineNos: false # GitHub 마크다운처럼 기본 줄번호 없이 깔끔하게
-    noClasses: false # CSS 클래스 기반 하이라이팅
+    lineNos: false # GitHub 스타일 깔끔한 코드 블록
+    noClasses: false
     style: "github"
   tableOfContents:
     startLevel: 2
     endLevel: 4
     ordered: false
-
-# Site Params
-params:
-  siteName: "Blog"
-  copyright: "© 2026. All rights reserved."
-  math: true
-  mermaid: true
 
 # Top-level Menu Fallback
 menu:

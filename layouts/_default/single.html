@@ -20,22 +20,12 @@
     <h1 class="post-title">{{ .Title }}</h1>
 
     <div class="post-meta-sub">
-      <span class="post-reading-time">{{ .ReadingTime }} {{ i18n "minute" }} ({{ .WordCount }} {{ i18n "words" }})</span>
+      <span class="post-reading-time">{{ .ReadingTime }}{{ i18n "minute" }}</span>
       {{ if ne .Date .Lastmod }}
         <span class="meta-sep">&middot;</span>
         <span class="post-lastmod">{{ i18n "updated_on" }}: {{ .Lastmod.Format "2006-01-02" }}</span>
       {{ end }}
     </div>
-
-    {{/* Translation links */}}
-    {{ if .IsTranslated }}
-      <div class="translation-notice">
-        <span class="notice-label">🌐 {{ i18n "translation_available" }}:</span>
-        {{ range .Translations }}
-          <a href="{{ .Permalink }}" class="translation-link">{{ .Language.LanguageName }} &rarr;</a>
-        {{ end }}
-      </div>
-    {{ end }}
   </header>
 
   {{/* Post Body & TOC */}}
